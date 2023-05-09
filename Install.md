@@ -1,115 +1,101 @@
 # Production régionalisée reproductible Onde 
-## Guide de déploiement en région 
 
-Ce document décrit étape par étape le déploiement de l'outil **PRR Onde** Cette opération utilise les services de la plateforme GitHub. La procédure requière uniquement la création d'un compte sur cette plateforme.
+Ce document décrit pas à pas l'installation et la mise à jour de l'outil **PRR Onde** Ces opérations utilisent les services de la plateforme GitHub. Elles requièrent uniquement la création d'un compte sur cette plateforme.
 
 ## Installation de l'outil
 1. Se connecter à Github
 2. Naviguer vers le dépôt https://github.com/richaben/prr_onde
-3. Créer une copie du dépôt en cliquant sur le bouton `Fork`.
+3. Cliquer sur le bouton `Fork` en haut à droite de la page d'accueil du dépôt. Cette action lance la copie du dépôt dans l'espace de l'utilisateur GitHub connecté.
 
-![image](https://user-images.githubusercontent.com/63242934/225858498-08e36a32-e997-46a1-9a7a-b4ac901ef5e7.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/3f989505-5419-460a-9a7d-be2749f8b9b3)
 
-   Un formulaire de paramétrage du nouveau dépôt apparaît.
+   Un formulaire de paramétrage du nouveau dépôt apparaît :
 
-![image](https://user-images.githubusercontent.com/63242934/225859383-d17c852e-efd7-4d0f-8d48-b8e50254048c.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/a2501275-e4bb-4465-af3a-d7191fa11e40)
 
-4. Conserver le nom du dépôt `PRR_ONDE`
-5. Décocher l'option `Copy the master branch only` 
-6. Cliquer sur le bouton `Create fork`. Une fois la copie réalisée, le dépôt apparaît dans l'espace de travail de l'utilisateur connecté.
+4. Décocher l'option `Copy the master branch only` et cliquer sur le bouton `Create fork`. Une fois la copie réalisée, le dépôt apparaît dans l'espace de travail de l'utilisateur connecté.
 
-![image](https://user-images.githubusercontent.com/63242934/225859765-787b50a6-4052-4939-81f4-686b20902d45.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/1aa9b99f-dfc5-4dd1-adc4-792f8cf897d8)
 
-7. Cliquer sur le bouton `Settings`.
+5. Cliquer sur le bouton `Settings`.
 
-![image](https://user-images.githubusercontent.com/63242934/225862564-50e94fc0-22f5-4c16-8181-aca4828a9e42.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/8d915f4d-4439-4da2-bb14-643d23626936)
 
-    L'écran de paramétrage du dépôt apparaît.
+   L'écran de paramétrage du dépôt apparaît :
 
-![image](https://user-images.githubusercontent.com/63242934/225862806-17075088-6dc2-4aa3-8da5-7e7f0e093f17.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/e7b7f69a-d5b7-478f-a89a-14368196aeb9)
 
-8. Cliquer sur l'élément `Code and automation > Pages` pour afficher les paramètres du service Github Pages.
+6. Cliquer sur l'élément `Code and automation > Pages` pour afficher les paramètres du service Github Pages. Ce service permet d'associer un site web au dépôt GitHub.
 
-![image](https://user-images.githubusercontent.com/63242934/225863116-09b15750-efa3-4981-8c7c-2d58e4b2aebe.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/367ff019-3ff8-484c-bcde-229ca0e9649e)
 
-9. Dans la section `Branch`, sélectionner `deploy` et `root` puis cliquer sur le bouton `Save` Le dépôt dispose désormais d'une page web sur Github Pages. Son url est de la forme https://{identifiant de l'utilisateur github}.github.io/PRR_ONDE/
-Exemple : https://ofb_normandie.github.io/PRR_ONDE/
-10. Cliquer sur l'élément `Code and automation > Actions > General` pour afficher les paramètres généraux de Github Actions.
+7. Dans la section `Branch`, sélectionner `deploy` et `root` puis cliquer sur le bouton `Save` Le dépôt dispose désormais d'une page web sur Github Pages. Son url est de la forme https://{identifiant de l'utilisateur github}.github.io/PRR_ONDE/ Exemple : https://ofb_normandie.github.io/PRR_ONDE/
 
-![image](https://user-images.githubusercontent.com/63242934/225863546-f344bb11-95e8-4098-bb34-2dfae49bde4c.png)
+8. Cliquer sur l'élément `Code and automation > Actions > General` pour afficher les paramètres généraux du service Github Actions. Ce service permet d'automatiser l'exécution d'un traitement.
 
-11. Dans la section `Workflow permissions` en bas de l'écran, sélectionner `Read and write permissions` puis cliquer sur le bouton `Save`.
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/0ee603a0-8fcd-46f0-a5db-6b0fd6967e71)
+
+9. Dans la section `Workflow permissions` en bas de l'écran, sélectionner `Read and write permissions` puis cliquer sur le bouton `Save`.
 
 ![image](https://user-images.githubusercontent.com/63242934/225863756-c601b08c-2e04-456e-814f-e826eb4c84a4.png)
 
-12. Afficher de nouveau la page d'accueil du dépôt
-13. Cliquer sur le bouton de paramétrage du panneau `About` à droite de l'écran.
+10. Afficher de nouveau la page d'accueil du dépôt et cliquer sur le bouton de paramétrage du panneau `About` à droite de l'écran.
 
-![image](https://user-images.githubusercontent.com/63242934/225864049-d19311eb-b750-43c8-b749-907cc745fc90.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/289b9820-769d-46db-b485-a50ad30094e6)
 
-    Une fenêtre apparaît.
+    Une fenêtre apparaît :
 
-![image](https://user-images.githubusercontent.com/63242934/225864189-1f44d278-7543-4f4d-9266-822b3a977a77.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/5637638d-39b5-4229-aebd-482fb1c06178)
 
-14. Renseigner le champ `Website` avec l'url de la page Github Pages mentionnée ci-dessus puis cliquer sur le bouton `Save changes`. L'url doit apparaître dans le panneau `About`.
+11. Renseigner le champ `Website` avec l'url de la page Github Pages mentionnée ci-dessus puis cliquer sur le bouton `Save changes`. L'url doit apparaître dans le panneau `About`.
 
-![image](https://user-images.githubusercontent.com/63242934/225864721-1529cc65-74c5-45d6-9e51-e3ce7c40ca7d.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/6588c97c-6a49-43a4-b2e6-0972daa336d7)
 
-15. Cliquer sur l'élément `Actions`.
+12. Cliquer sur l'élément `Actions`.
 
-![image](https://user-images.githubusercontent.com/63242934/225865030-ac4677da-987e-453f-8ab3-13a8b045345e.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/3ca9abb1-cef2-469d-b518-32c711cbd952)
 
-    La liste des flux de travail (workflow) apparaît. Il en existe trois :
+    La fenêtre suivante apparaît :
+
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/0eb34c98-545d-4937-b37e-7e3dbee7a767)
+
+13. Cliquer sur le bouton `I understand my workflows, go ahead and enable them` La liste des flux de travail (workflow) apparaît :
+
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/783ba554-3f05-4463-b964-dad564b05d42)
+
+La liste comprend :
     - un workflow de synchronisation les branches `master` et `deploy`
-    - un workflow de génération de la page web
-    - un workflow de déploiement de la page web sur Github Pages.
+    - un workflow d'actualisation quotidienne du site web
 
-![image](https://user-images.githubusercontent.com/63242934/225865213-57920d7d-1b04-4a05-b891-457cecdf6bca.png)
+14. Cliquer sur l'item `Script_R_ONDE_carto_auto`. Le paramétrage du flux de travail apparaît :
 
-16. Cliquer sur l'item `Script_R_ONDE_carto_auto`. Le paramétrage du flux de travail apparaît.
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/0739fcc0-51fb-4117-aad9-9b79a816276e)
 
-![image](https://user-images.githubusercontent.com/63242934/225865505-283693ea-88d9-46ed-ad5c-1957395c8872.png)
+15. Cliquer sur le bouton `Enable workflow` pour activer le flux de travail.
 
-17. Cliquer sur le bouton `Enable workflow` pour activer le flux de travail.
+A ce stade, toute modification du code ou, à minima, chaque matin le site web est actualisé. Le contenu de la page, sa mise en forme et/ou la fréquence de son actualisation peuvent être librement modifiés.
 
-![image](https://user-images.githubusercontent.com/63242934/225865651-60d69a44-6b0b-4fef-8019-1d107d620c34.png)
+16. Afficher la page d'accueil du dépôt et cliquer sur le script R `_config.R` à la racine du dépôt :
 
-    L'écran de lancement du flux de travail apparaît.
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/ecdd196e-2ae4-48ac-aba0-d7e5dfd3cbce)
 
-![image](https://user-images.githubusercontent.com/63242934/225866110-5627cdcc-06ff-460f-aa9e-7719ea3af637.png)
+   Le code R du script apparaît à l'écran :
 
-Une fois ces opérations réalisées, toute modification du code entraine l'actualisation de la page web chaque matin. Le contenu de la page, sa mise en forme et/ou la fréquence de son actualisation peuvent être librement modifiés.
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/95c28ba8-9748-400a-b288-377a3d6076f3)
 
-18. Cliquer sur le script R `_config.R` à la racine du dépôt. Le code R du script apparaît à l'écran.
+17. Cliquer sur le bouton `Edit this file` et adapter le paramétrage à la région cible. **Important** : les codes de département doivent être encadrés par des `"` et préfixés par `0`pour les départements dont le code est inférieur à 10.
 
-![image](https://user-images.githubusercontent.com/63242934/225859972-bb39ddc4-8e0c-4a0c-88ef-58bf91c858f3.png)
+18. Une fois le paramétrage renseigné, cliquer sur le bouton `Commit changes`
 
-19. Cliquer sur le bouton `Edit this file`.
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/94aeb53f-9e82-47c9-8414-79f9edf7b58a)
 
-![image](https://user-images.githubusercontent.com/63242934/225860270-6bbb8145-701a-4e9d-84bb-4e91a910427b.png)
+    Une fenêtre apparaît :
+    
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/34fab0f7-b03b-411a-adf2-860cffcd4218)
+    
+19. Renseigner `Adaptation du traitement à la région` dans le champ `Commit message` et cliquer sur le bouton `Commit changes` Une fois enregistré, le script réapparaît en lecture seule. Cette modification de code entraine l'actualisation du site web. Il est possible de suivre l'avancement du traitement en cliquant sur le libellé du flux de travail (menu `Actions`puis cliquer sur le script R adéquat :
 
-   Le fichier devient éditable.
-
-![image](https://user-images.githubusercontent.com/63242934/225860409-54f80c47-199d-485d-bbde-90441e317416.png)
-
-20. Adapter le paramétrage par défaut à la région cible. **Important** : les codes de département doivent être encadrés par des `"` et préfixés par `0`pour les départements dont le code est inférieur à 10.
-
-![image](https://user-images.githubusercontent.com/63242934/225860812-75bf8f3d-d58e-4ece-92af-171c73d8f487.png)
-
-21. Dans le panneau `Commit changes` en bas de l'écran, renseigner un libellé associé à la modification du code. Par exemple :
-	Libellé : `Adaptation du traitement à la région`
-
-![image](https://user-images.githubusercontent.com/63242934/225861256-7030dd85-1583-47dd-aadc-5eb58ecc1e06.png)
-
-22. Cliquer sur le bouton `Commit changes` Une fois enregistré, le script réapparaît en lecture seule.
-
-Cette modification de code entraine la ré génération de la page web.
-
-![image](https://user-images.githubusercontent.com/63242934/225866779-fb4a14d3-1c22-4131-ba36-71993d2b9498.png)
-
-    Il est possible de suivre l'avancement du traitement en cliquant sur le libellé du flux.
-
-![image](https://user-images.githubusercontent.com/63242934/225866918-38fa86a4-e801-4317-ae52-6bbc311582c5.png)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/99f52d89-b364-424e-9f18-8e45c8cadc19)
 
     Il est également possible de suivvre le détail des traitements en cliquant de nouveau sur le libellé du script R.
 
