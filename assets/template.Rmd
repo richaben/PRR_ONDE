@@ -1,0 +1,379 @@
+---
+params:
+    set_title: "Cartographie régionale du suivi des étiages (ONDE)"
+    set_author: "OFB"
+title: "`r params$set_title`"
+author: "`r params$set_author`"
+date: "`r paste0('MAJ ', format(Sys.time(), '%d/%m/%Y - %H:%M', tz='Europe/Paris'))`"
+output: 
+  html_document :
+    highlight: pygments #default, tango, pygments, kate, monochrome, espresso, zenburn, haddock, and textmate 
+    theme: flatly #“default”, “cerulean”, “journal”, “flatly”, “readable”, “spacelab”, “united”, “cosmo”, “lumen”, “paper”, “sandstone”, “simplex”, “yeti”
+    css: "../assets/theme_html2.css"
+# Language
+lang: fr-FR
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo      = FALSE,
+                      warning   = FALSE,
+                      message   = FALSE,
+                      fig.align = "center",
+                      fig.retina = 3,
+                      dev = 'png',
+                      cache = F,
+                      dev = "ragg_png"
+                      )
+```
+
+```{r, echo = FALSE}
+htmltools::img(src = knitr::image_uri('logo_OFB_v2.png'),
+               alt = 'logo',
+               style = 'position:absolute; top:0; right:0; padding:10px; width:200px;')
+```
+
+```{r traitement, include=FALSE,echo = FALSE}
+library(tidyverse)
+library(ondetools)
+library(sf)
+library(mapview)
+library(leaflet)
+library(leaflet.extras)
+library(forcats)
+library(ggrepel)
+library(glue)
+library(scales)
+library(data.table)
+
+`%ni%` <- Negate(`%in%`)
+
+load(file = "../data/processed_data/map_data_cartoMod.RData")
+load(file = "../data/raw_data/departement_shape.RData")
+source("../_config.R")
+
+```
+
+```{r, include=FALSE}
+stations_onde_geo_map1 <-
+  stations_onde_geo_usuelles %>% 
+  left_join(onde_dernieres_campagnes %>% select(code_station, Couleur, date_campagne, label_point))
+
+date_derniere_campagne_usuelle <- 
+  unique(onde_dernieres_campagnes_usuelles$Mois_campagne) %>% 
+  max() %>% 
+  format("%m/%Y") 
+
+date_derniere_campagne_comp <- 
+  unique(onde_dernieres_campagnes_comp$Mois_campagne) %>% 
+  max() %>% 
+  format("%m/%Y")
+```
+
+⚠️ Les données ci-dessous concernent les observations réalisées au plus tard :
+
+-   en **`r date_derniere_campagne_usuelle`** pour les campagnes usuelles ;
+-   et en **`r date_derniere_campagne_comp`** pour les campagnes complémentaires.
+
+#  {.tabset .tabset-pills}
+
+## Campagnes {.tabset}
+
+Les cartes se lisent de la manière suivante :
+
+-   La couleur des points correspond à la situation des dernières observations (usuelles ou complémentaires) sur les stations. **Les données affichées peuvent donc ne pas être comparables si les suivis n'ont pas été réalisés à la même période** ;
+-   Les tailles des points sont proportionnelles à la fréquence des assecs sur les chroniques de données des campagnes usuelles ;
+-   En cliquant sur une station, un graphique de l'historique des observations et états d'écoulement peut être affiché ;.
+-   Avec le menu déroulant (en haut à droite), différents éléments cartographiques peuvent être affichés (i.e. fonds de cartes, départements, assecs, zones d'alerte Propluvia).
+
+Deux onglets pour les deux typologies d'observations sont distingués:
+
+-   **Typologie nationale** : [**écoulement visible**]{style="color: #0570b0;"} ; [**écoulement non visible**]{style="color: #feb24c;"} et [**assec**]{style="color: #e31a1c;"} ;
+
+-   **Typologie départementale** : [**écoulement visible acceptable**]{style="color: #0570b0;"} ; [**écoulement visible faible**]{style="color: #bdd7e7;"} ; [**écoulement non visible**]{style="color: #feb24c;"} et [**assec**]{style="color: #e31a1c;"}.
+
+Les **observations impossibles** et **données manquantes** sont également représentées.
+
+<br>
+
+```{r include=FALSE}
+masque_metropole <- depts %>% 
+  filter(code_insee %ni% conf_dep) %>% 
+  filter(code_insee %ni% c(971:976)) %>% 
+  summarise() %>% 
+  sf::st_transform(crs = 4326)
+
+depts_sel <- depts %>%
+      filter(code_insee %in% conf_dep) %>% 
+  sf::st_transform(crs = 4326)
+depts_sel_bbox <- sf::st_bbox(depts_sel)
+```
+
+```{r include=FALSE}
+finalize_map <- function(map, bbox) {
+  map@map <- map@map %>% 
+  addTiles(group = "OSM") %>%
+  #addProviderTiles(providers$CartoDB.PositronOnlyLabels, group = "Villes") %>% 
+  addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+           options = c(WMSTileOptions(tileSize = 256),
+                       providerTileOptions(minZoom = 1, maxZoom = 15)),
+           attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+           group = "Plan IGN"
+  ) %>%
+  addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+           options = c(WMSTileOptions(tileSize = 256),
+                       providerTileOptions(minZoom = 1, maxZoom = 22)),
+           attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+           group = "Photo aérienne"
+  ) %>%
+  addLayersControl(baseGroups    = c("OSM","Plan IGN","Photo aérienne"),
+                   overlayGroups = c("Assecs","Departements",'Zones alerte'),
+                   options       = layersControlOptions(collapsed = TRUE)) %>% 
+  hideGroup("Zones alerte") %>% 
+  fitBounds(
+    lng1 = bbox[["xmin"]],
+    lat1 = bbox[["ymin"]],
+    lng2 = bbox[["xmax"]],
+    lat2 = bbox[["ymax"]]
+  )
+  
+  map
+}
+```
+
+```{r include=FALSE}
+map_situation <- 
+  mapview::mapview(
+    masque_metropole,
+    alpha.regions = .75,
+    legend = FALSE,
+    homebutton = FALSE,
+    stroke = FALSE,
+    col.regions = "white",
+    label = "",
+    popup = FALSE
+  ) +
+  mapview::mapview(
+    depts_sel %>% 
+      dplyr::mutate(
+        label_dept = paste0(nom, " (", code_insee, ")")
+      ),
+    alpha.regions = 0,
+    legend = FALSE, 
+    layer.name = "Departements", zcol = "label_dept",
+    homebutton = FALSE,stroke = TRUE,color="black", lwd = 2,
+    popup = FALSE
+    ) +
+  mapview(
+    propluvia, zcol = "libel",
+    alpha.regions = 0.10,
+    legend = FALSE, col.regions = 'black',
+    layer.name = "Zones alerte",homebutton = FALSE,stroke = TRUE,color="black",
+    popup = FALSE
+    )
+
+```
+
+### Typologie nationale
+
+```{r cartoDynamique 3mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
+(map_situation +
+  mapview(stations_onde_geo_map1, cex = "pourcentage_assecs",
+          layer.name = "Assecs",
+          legend = FALSE,
+          alpha.regions = 0.9,
+          zcol = "label_point",
+          popup = leafpop::popupGraph(graphiques_int_3mod, width = 400, height = 350),
+          col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
+  finalize_map(bbox = depts_sel_bbox)
+  
+```
+
+### Typologie départementale
+
+```{r cartoDynamique 4mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
+(map_situation +
+  mapview(stations_onde_geo_map1, cex = "pourcentage_assecs",
+          layer.name = "Assecs",
+          legend = FALSE,
+          alpha.regions = 0.9,
+          zcol = "label_point",
+          popup = leafpop::popupGraph(graphiques_int_4mod, width = 400, height = 350),
+          col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
+  finalize_map(bbox = depts_sel_bbox)
+
+```
+
+## Bilan régional
+
+### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre)** {.tabset}
+
+<br>
+
+#### Typologie nationale
+
+```{r bilan observation, fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
+#####-----------
+### plot 3 modalites
+ggplot(df_categ_obs_3mod) +
+  aes(y = frq, x = forcats::fct_rev(factor(Mois)), fill= forcats::fct_rev(lib_ecoul3mod), label=Label_p) +
+  geom_bar(position="stack", stat="identity", alpha= 0.7, colour = 'black', width = 0.7, linewidth  = 0.01)+
+  facet_grid(~code_departement) +
+  ggrepel::geom_text_repel(size=3, color="black", fontface='bold.italic', position = position_stack(vjust = 0.5)) +
+  coord_flip() +
+  ylab("Pourcentage (%)") +
+  xlab("Mois") +
+  # labs(title = glue::glue("Bilan {max(df_categ_obs_3mod$Annee)} par d\u00e9partements"), 
+  #      subtitle = "Typologie nationale - Campagnes usuelles") +
+  ggplot2::scale_fill_manual(name = "Situation stations",
+                             values = c("Ecoulement visible" = "#4575b4",
+                                        "Ecoulement visible acceptable" = "#4575b4",
+                                        "Ecoulement visible faible" = "#bdd7e7",
+                                        "Assec" = "#d73027",
+                                        "Ecoulement non visible" = "#fe9929",
+                                        "Observation impossible" = "grey50")) +
+  theme_bw() +
+  ggplot2::theme(title = ggplot2::element_text(size = 11, face = "bold"), 
+                 legend.text = ggplot2::element_text(size = 11),
+                 legend.title = ggplot2::element_text(size = 11, face = 'bold'),
+                 axis.text.y = ggplot2::element_text(size = 11, colour = 'black'),
+                 axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
+                 strip.text.x = element_text(size = 11, color = "black", face = "bold"
+                 ),
+                 strip.background = element_rect(
+                   color="black", fill="grey80", size=1, linetype="solid"
+                 ),
+                 panel.grid.major = ggplot2::element_line(colour = NA),
+                 panel.grid.minor = ggplot2::element_line(colour = NA),
+                 legend.position = "bottom",
+                 plot.background = ggplot2::element_blank(),
+  ) +
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+
+```
+
+#### Typologie départementale
+
+```{r fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
+ggplot(df_categ_obs_4mod) +
+  aes(y = frq, x = forcats::fct_rev(factor(Mois)), fill= forcats::fct_rev(lib_ecoul4mod), label=Label_p) +
+  geom_bar(position="stack", stat="identity", alpha= 0.7, colour = 'black', width = 0.7, linewidth  = 0.01)+
+  facet_grid(~code_departement) +
+  ggrepel::geom_text_repel(size=3, color="black", fontface='bold.italic', position = position_stack(vjust = 0.5)) +
+  coord_flip() +
+  ylab("Pourcentage (%)") +
+  xlab("Mois") +
+  # labs(title = glue::glue("Bilan {max(df_categ_obs_4mod$Annee)} par d\u00e9partements"), 
+  #      subtitle = "Typologie d\u00e9partementale - Campagnes usuelles") +
+  ggplot2::scale_fill_manual(name = "Situation stations",
+                             values = c("Ecoulement visible" = "#4575b4",
+                                        "Ecoulement visible acceptable" = "#4575b4",
+                                        "Ecoulement visible faible" = "#bdd7e7",
+                                        "Assec" = "#d73027",
+                                        "Ecoulement non visible" = "#fe9929",
+                                        "Observation impossible" = "grey50")) +
+  theme_bw() +
+  ggplot2::theme(title = ggplot2::element_text(size = 11, face = "bold"), 
+                 legend.text = ggplot2::element_text(size = 11),
+                 legend.title = ggplot2::element_text(size = 11, face = 'bold'),
+                 axis.text.y = ggplot2::element_text(size = 11, colour = 'black'),
+                 axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
+                 strip.text.x = element_text(size = 11, color = "black", face = "bold"
+                 ),
+                 strip.background = element_rect(
+                   color="black", fill="grey80", size=1, linetype="solid"
+                 ),
+                 panel.grid.major = ggplot2::element_line(colour = NA),
+                 panel.grid.minor = ggplot2::element_line(colour = NA),
+                 legend.position = "bottom",
+                 plot.background = ggplot2::element_blank(),
+
+  ) +
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+```
+
+### **Sévérité des assecs**
+
+<br>
+
+```{r bilan heatmap, fig.height = 5, fig.width = 9, align = "center", warning = FALSE}
+###
+heatmap_df %>% 
+  ggplot() + 
+  aes(x = Annee, y = forcats::fct_rev(factor(Mois)), fill=pourcentage_assecs) + 
+  geom_tile(col='white',size=0.5) +
+  scale_fill_gradientn("% d\'assecs",
+                       colors = adjustcolor(hcl.colors(10, "RdYlBu",rev = T),alpha.f = 0.8),
+                       limits=c(0,100),na.value = adjustcolor("grey90",alpha.f = 0.7)) +
+  geom_text(aes(label=Label_p),size=3.5,color="black",fontface='bold.italic') +
+  #geom_text(aes(label = Label),size=3,color="black",fontface='italic') +
+  scale_size(guide='none') +
+  scale_x_continuous(breaks = scales::breaks_width(1),expand = c(0,0)) +
+  ylab("Mois") + 
+  xlab(NULL) +
+  ggtitle(glue::glue("Proportion de stations en assec")) +
+  # annotate("rect", xmin = 2022-0.5, xmax = 2022+0.49, ymin = 0.5, ymax = 5.5,
+  #          alpha = 0, color= "black",linetype = 2, size=1.2) +
+  theme_bw() +
+  theme(title = element_text(size = 11,face = 'bold'), 
+        axis.text.x = element_text(size=11,angle = 45,hjust = 1),
+        axis.text.y = element_text(size=11),
+        legend.position = 'right',
+        axis.ticks = element_blank(),
+        panel.grid=element_blank())
+
+
+```
+
+### **Des assecs se suivant d'un mois sur l'autre**
+
+<br>
+
+```{r bilan duree, fig.height = 5, fig.width = 9, align = "center", warning = FALSE}
+duree_assecs_df %>%
+  filter(label != '0 mois') %>% 
+  ggplot() + aes(x = as.factor(Annee), y = pct, fill = max_nb_mois_assec) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(y = pct, label = nb_station), 
+            fontface="italic",size=3.5,
+            position = position_stack(vjust = 0.5),
+            show.legend = FALSE) +
+  scale_fill_brewer("Nombre de campagnes\navec assec (mai-septembre)", 
+                    palette = "YlOrRd",
+                    direction = -1, 
+                    labels=sort(unique(duree_assecs_df$label),decreasing = T)) +
+  scale_y_continuous(labels = scales::percent_format(1)) +
+  ggtitle("Proportions et nombre de stations concernées") +
+  theme_bw() +
+  theme(title = element_text(size = 11,face = 'bold'), 
+        axis.text.x = element_text(size = 11, angle = 45,hjust = 1),
+        axis.text.y = element_text(size=11),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()) +
+  ylab(NULL) + 
+  xlab(NULL)
+
+```
+
+## Méthodologie
+
+**Le réseau ONDE**
+
+L'Observatoire national des étiages (ONDE) a pour objectif de contribuer à la surveillance et la compréhension des phénomènes d'étiages de certains cours d'eau métropolitains. Ce dispositif est porté par l'[Office français de la biodiversité](https://www.ofb.gouv.fr/).
+
+**Les données**
+
+Les données sont produites par les agents de l'Office français de la biodiversité à partir des observations de terrain réalisées sur les stations du réseau ONDE. Les données sont [mises à disposition](https://onde.eaufrance.fr/content/t%C3%A9l%C3%A9charger-les-donn%C3%A9es-des-campagnes-par-ann%C3%A9e) sous forme de fichiers annuels au format Excel. Le fichier de l'année en cours est mis à jour "au fil de l'eau" ; ou disponible sur la plateforme [Hubeau](https://hubeau.eaufrance.fr/) à partir des APIs disponibles (*API écoulement*).
+
+**Les campagnes d'observations**
+
+Deux types de campagnes d'observations sont distinguées :
+
+-   Les campagnes d'observations dites *usuelles*, réalisées sur chaque département au niveau national, au pas mensuel sur la période estivale (de mai à septembre) avec des observations systématiques à la date du 25 +/- 2 jours du mois.
+
+-   Les campagnes d'observations *complémentaires*, qui sont réalisées lorsque les conditions hydrologiques locales sont jugées sensibles (i.e, sécheresse). Ces observations *complémentaires* peuvent être réalisées sur un sous-ensemble (ou la totalité) des stations présentes en départements.
+
+**La valorisation présentée ici**
+
+La lecture des données, leur mise en forme et la production des graphiques sont effectués au moyen du logiciel *R* et de plusieurs *packages* (dont `ondetools`, `hubeau`, `tidyverse`, `ggplot2`, `rmarkdown`, `leaflet` et `mapview`).
+
+Les fonds et couches pour les cartes proviennent de *leaflet*, *IGN*, *Propluvia*.
