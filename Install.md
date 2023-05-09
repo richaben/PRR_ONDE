@@ -3,7 +3,7 @@
 
 Ce document décrit étape par étape le déploiement de l'outil **PRR Onde** Cette opération utilise les services de la plateforme GitHub. La procédure requière uniquement la création d'un compte sur cette plateforme.
 
-## Procédure de déploiement
+## Installation de l'outil
 1. Se connecter à Github
 2. Naviguer vers le dépôt https://github.com/richaben/prr_onde
 3. Créer une copie du dépôt en cliquant sur le bouton `Fork`.
@@ -116,6 +116,18 @@ Cette modification de code entraine la ré génération de la page web.
 ![image](https://user-images.githubusercontent.com/63242934/225867577-1426d7ba-43ca-4381-8dc3-a835290dcedd.png)
 
 Une fois la page web ré générée, naviguer vers https://ofb_normandie.github.io/PRR_ONDE/ La page doit afficher les données de la région.
+
+## Mise à jour de l'outil
+
+1. Se connecter à GitHub
+2. Afficher la page d'accueil du dépôt PRR_ONDE. Un message `This branch is ...`doit apparaître.
+
+![image](https://user-images.githubusercontent.com/63242934/237046767-a60dab0b-f53e-460c-aeec-fde098584495.png)
+
+4. Cliquer sur le bouton `Sync fork` Une fenêtre de validation apparaît.
+5. Cliquer sur le bouton `Update branch` 
+
+La mise à jour de l'outil est déclenchée. Dans la foulée, la page web est ré générée.
 
 ## Exécution manuelle de la génération de la page web
 
