@@ -31,7 +31,7 @@ Prérequis : disposer d'un compte GitHub.
 
 ![image](https://github.com/richaben/PRR_ONDE/assets/63242934/367ff019-3ff8-484c-bcde-229ca0e9649e)
 
-7. Dans la section `Branch`, sélectionner `deploy` et `root` puis cliquer sur le bouton `Save` Le dépôt dispose désormais d'un site web hébergé par `Github Pages`. L'url d'accès à ce site est de la forme https://{identifiant de l'utilisateur github}.github.io/PRR_ONDE/ Exemple : https://ofb_normandie.github.io/PRR_ONDE/
+7. Dans la section `Branch`, sélectionner `deploy` et `root` puis cliquer sur le bouton `Save` Le dépôt dispose désormais d'un site web hébergé par `Github Pages`. L'url d'accès à ce site est de la forme https://{identifiant de l'utilisateur github}.github.io/PRR_ONDE/ Exemple : https://ofb-nor.github.io/PRR_ONDE/
 
 8. Afficher de nouveau la page d'accueil du dépôt et cliquer sur le bouton de paramétrage du panneau `About` (bouton symbolisé par un engrenage à droite de l'écran).
 
@@ -39,11 +39,11 @@ Prérequis : disposer d'un compte GitHub.
 
    Une fenêtre apparaît :
 
-![image](https://github.com/richaben/PRR_ONDE/assets/63242934/5637638d-39b5-4229-aebd-482fb1c06178)
+![image](https://github.com/richaben/PRR_ONDE/assets/26381994/df8e2954-de19-48e6-8da3-8b5db0ba87dc)
 
 9. Renseigner le champ `Website` avec l'url du site web du dépôt puis cliquer sur le bouton `Save changes`. L'url doit désormais apparaître dans le panneau `About`.
 
-![image](https://github.com/richaben/PRR_ONDE/assets/63242934/6588c97c-6a49-43a4-b2e6-0972daa336d7)
+![image](https://github.com/richaben/PRR_ONDE/assets/26381994/730ab103-f4fb-4723-b177-2d331bfbe1ac)
 
 10. Cliquer sur l'élément `Code and automation > Actions > General` pour afficher les paramètres généraux du service `Github Actions`. Ce service permet d'automatiser l'exécution d'un traitement.
 
@@ -64,6 +64,7 @@ Prérequis : disposer d'un compte GitHub.
 13. Cliquer sur le bouton `I understand my workflows, go ahead and enable them` La liste des traitements automatisés ou flux de travail (*workflow* en anglais) apparaît :
 
 ![image](https://github.com/richaben/PRR_ONDE/assets/63242934/783ba554-3f05-4463-b964-dad564b05d42)
+
 
 La liste comprend :
     - la synchronisation automatique des branches `master` et `deploy` après chaque mise à jour de l'outil ;
