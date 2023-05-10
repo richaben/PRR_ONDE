@@ -118,9 +118,9 @@ A ce stade, toute mise à jour de l'outil ou des données entraine une actualisa
 ## Mise à jour de l'outil
 
 1. Se connecter à GitHub
-2. Afficher la page d'accueil du dépôt `PRR_ONDE`. Un message `This branch is ...`doit apparaître.
+2. Afficher la page d'accueil du dépôt `PRR_ONDE`. Un message `This branch is ..., **x commits behind richaben:master**`doit indiquer la nécessité d'une mise à jour de l'outil.
 
-![image](https://github.com/richaben/PRR_ONDE/assets/63242934/50d9005d-acee-43a1-a052-9b9187d0cf48)
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/004fefeb-c746-4fd9-b2e8-9aad69d294b1)
 
 3. Cliquer sur le bouton `Sync fork` Une fenêtre de validation apparaît.
 4. Cliquer sur le bouton `Update branch` 
