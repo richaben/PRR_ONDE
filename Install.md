@@ -1,4 +1,4 @@
-# Production régionalisée reproductible Onde 
+# Production régionalisée reproductible (PRR) Onde 
 
 Ce document décrit pas à pas l'installation et la mise à jour de l'outil **PRR Onde**. Ces opérations utilisent les services de la plateforme GitHub. Elles requièrent uniquement la création d'un compte sur cette plateforme.
 
