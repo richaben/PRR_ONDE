@@ -48,7 +48,7 @@ library(data.table)
 `%ni%` <- Negate(`%in%`)
 
 load(file = "../data/processed_data/map_data_cartoMod.RData")
-load(file = "../data/raw_data/departement_shape.RData")
+load(file = "../data/raw_data/masks.Rdata")
 source("../_config.R")
 
 ```
@@ -96,11 +96,14 @@ Les **observations impossibles** et **données manquantes** sont également repr
 <br>
 
 ```{r include=FALSE}
-masque_metropole <- depts %>% 
+masque_eu <- depts %>% 
   filter(code_insee %ni% conf_dep) %>% 
-  filter(code_insee %ni% c(971:976)) %>% 
   summarise() %>% 
-  sf::st_transform(crs = 4326)
+  sf::st_transform(crs = 4326) %>% 
+  sf::st_union(
+    other_eu_countries %>% 
+      sf::st_transform(crs = 4326)
+    )
 
 depts_sel <- depts %>%
       filter(code_insee %in% conf_dep) %>% 
@@ -143,7 +146,7 @@ finalize_map <- function(map, bbox) {
 ```{r include=FALSE}
 map_situation <- 
   mapview::mapview(
-    masque_metropole,
+    masque_eu,
     alpha.regions = .75,
     legend = FALSE,
     homebutton = FALSE,
