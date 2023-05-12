@@ -205,7 +205,7 @@ map_situation <-
 
 ## Bilan régional
 
-### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre)** {.tabset}
+### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre `r unique(df_categ_obs_3mod$Annee)`)** {.tabset}
 
 <br>
 
