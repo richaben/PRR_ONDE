@@ -342,10 +342,12 @@ produire_graph_pour_une_station <-
       scale_fill_manual(values = couleurs, breaks = levels(prov$modalite), name = 'Modalités') +
       scale_shape_manual(values = c(21,22),name = 'Type campagne') +
       scale_size_manual(values = c(5,10),name = 'Type campagne') +
-      scale_y_continuous(breaks = 1:12, labels = 1:12) +
+      scale_y_continuous(breaks = 1:12, labels = 1:12, limits = c(1, 12)) +
       scale_x_continuous(breaks = min(prov$Annee, na.rm = T):max(prov$Annee, na.rm = T),
                          labels = min(prov$Annee, na.rm = T):max(prov$Annee, na.rm = T)) +
-      labs(x = "", y = "Mois", title = nom_station) +
+      labs(x = "", y = "Mois", 
+           title = unique(prov$libelle_station),
+           subtitle = unique(prov$code_station)) +
       theme_bw() +
       theme(title = element_text(face = 'bold'),
             axis.text.x = element_text(size=10),
