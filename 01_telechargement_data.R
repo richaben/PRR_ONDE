@@ -359,6 +359,8 @@ produire_graph_pour_une_station <-
     graph1
   }
 
+list.files("www/png", recursive = TRUE, full.names = TRUE) %>% 
+  purrr::walk(file.remove)
 
 ### -> graphiques 3modalités
 graphiques_int_3mod <- 
@@ -369,6 +371,20 @@ graphiques_int_3mod <-
 
 names(graphiques_int_3mod) <- stations_onde_geo_usuelles$code_station
 
+purrr::walk(
+  names(graphiques_int_3mod),
+  function(station) {
+    ggplot2::ggsave(
+      plot = graphiques_int_3mod[[station]],
+      filename = paste0("www/png/3mod/", station, ".png"),
+      width = 14,
+      height = 10,
+      units = "cm",
+      dpi = 150
+    )
+  }
+  )
+
 ### -> graphiques 4modalités
 graphiques_int_4mod <- 
   purrr::map(.x = stations_onde_geo_usuelles$code_station, 
@@ -377,6 +393,20 @@ graphiques_int_4mod <-
              onde_df = onde_periode)
 
 names(graphiques_int_4mod) <- stations_onde_geo_usuelles$code_station
+
+purrr::walk(
+  names(graphiques_int_4mod),
+  function(station) {
+    ggplot2::ggsave(
+      plot = graphiques_int_4mod[[station]],
+      filename = paste0("www/png/4mod/", station, ".png"),
+      width = 14,
+      height = 10,
+      units = "cm",
+      dpi = 150
+    )
+  }
+)
 
 #####################################
 # Mise en forme des tableaux pour les graphiques bilan
@@ -473,8 +503,8 @@ propluvia <-
 #####################################
 # Sauvegarde des objets pour page Rmd
 save(stations_onde_geo_usuelles, 
-     graphiques_int_3mod,
-     graphiques_int_4mod,
+     # graphiques_int_3mod,
+     # graphiques_int_4mod,
      onde_dernieres_campagnes,
      onde_dernieres_campagnes_usuelles, 
      onde_dernieres_campagnes_comp,
