@@ -194,7 +194,7 @@ popups_3mod <- file.path("www/png/3mod", list.files(path = "../www/png/3mod/", p
           # popup = leafpop::popupGraph(graphiques_int_3mod, width = 400, height = 350),
           popup = leafpop::popupImage(
             popups_3mod[stations_onde_geo_map1$code_station],
-            height = 350, width = 400
+            height = 290, width = 400
           ),
           col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
   finalize_map(bbox = depts_sel_bbox)
@@ -221,7 +221,7 @@ popups_4mod <- file.path("www/png/4mod", list.files(path = "../www/png/4mod/", p
           zcol = "label_point",
           popup = leafpop::popupImage(
             popups_4mod[stations_onde_geo_map1$code_station],
-            height = 350, width = 400
+            height = 290, width = 400
           ),
           # popup = leafpop::popupGraph(graphiques_int_4mod, width = 400, height = 350),
           col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
