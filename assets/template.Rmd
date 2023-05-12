@@ -96,19 +96,18 @@ Les **observations impossibles** et **données manquantes** sont également repr
 <br>
 
 ```{r include=FALSE}
-masque_eu <- depts %>% 
-  filter(code_insee %ni% conf_dep) %>% 
-  summarise() %>% 
-  sf::st_transform(crs = 4326) %>% 
-  sf::st_union(
-    other_eu_countries %>% 
-      sf::st_transform(crs = 4326)
-    )
-
 depts_sel <- depts %>%
       filter(code_insee %in% conf_dep) %>% 
   sf::st_transform(crs = 4326)
 depts_sel_bbox <- sf::st_bbox(depts_sel)
+
+masque_eu <- other_eu_countries %>% 
+  sf::st_transform(crs = 4326) %>% 
+  sf::st_difference(
+    depts_sel %>% 
+      dplyr::summarise()
+  )
+
 ```
 
 ```{r include=FALSE}
