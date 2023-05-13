@@ -342,10 +342,12 @@ produire_graph_pour_une_station <-
       scale_fill_manual(values = couleurs, breaks = levels(prov$modalite), name = 'Modalités') +
       scale_shape_manual(values = c(21,22),name = 'Type campagne') +
       scale_size_manual(values = c(5,10),name = 'Type campagne') +
-      scale_y_continuous(breaks = 1:12, labels = 1:12) +
+      scale_y_continuous(breaks = 1:12, labels = 1:12, limits = c(1, 12)) +
       scale_x_continuous(breaks = min(prov$Annee, na.rm = T):max(prov$Annee, na.rm = T),
                          labels = min(prov$Annee, na.rm = T):max(prov$Annee, na.rm = T)) +
-      labs(x = "", y = "Mois", title = nom_station) +
+      labs(x = "", y = "Mois", 
+           title = unique(prov$libelle_station),
+           subtitle = unique(prov$code_station)) +
       theme_bw() +
       theme(title = element_text(face = 'bold'),
             axis.text.x = element_text(size=10),
@@ -357,6 +359,8 @@ produire_graph_pour_une_station <-
     graph1
   }
 
+list.files("www/png", recursive = TRUE, full.names = TRUE) %>% 
+  purrr::walk(file.remove)
 
 ### -> graphiques 3modalités
 graphiques_int_3mod <- 
@@ -367,6 +371,20 @@ graphiques_int_3mod <-
 
 names(graphiques_int_3mod) <- stations_onde_geo_usuelles$code_station
 
+purrr::walk(
+  names(graphiques_int_3mod),
+  function(station) {
+    ggplot2::ggsave(
+      plot = graphiques_int_3mod[[station]],
+      filename = paste0("www/png/3mod/", station, ".png"),
+      width = 14,
+      height = 10,
+      units = "cm",
+      dpi = 150
+    )
+  }
+  )
+
 ### -> graphiques 4modalités
 graphiques_int_4mod <- 
   purrr::map(.x = stations_onde_geo_usuelles$code_station, 
@@ -375,6 +393,20 @@ graphiques_int_4mod <-
              onde_df = onde_periode)
 
 names(graphiques_int_4mod) <- stations_onde_geo_usuelles$code_station
+
+purrr::walk(
+  names(graphiques_int_4mod),
+  function(station) {
+    ggplot2::ggsave(
+      plot = graphiques_int_4mod[[station]],
+      filename = paste0("www/png/4mod/", station, ".png"),
+      width = 14,
+      height = 10,
+      units = "cm",
+      dpi = 150
+    )
+  }
+)
 
 #####################################
 # Mise en forme des tableaux pour les graphiques bilan
@@ -471,8 +503,8 @@ propluvia <-
 #####################################
 # Sauvegarde des objets pour page Rmd
 save(stations_onde_geo_usuelles, 
-     graphiques_int_3mod,
-     graphiques_int_4mod,
+     # graphiques_int_3mod,
+     # graphiques_int_4mod,
      onde_dernieres_campagnes,
      onde_dernieres_campagnes_usuelles, 
      onde_dernieres_campagnes_comp,
