@@ -127,9 +127,15 @@ finalize_map <- function(map, bbox) {
            attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
            group = "Photo aérienne"
   ) %>%
-  addLayersControl(baseGroups    = c("OSM","Plan IGN","Photo aérienne"),
-                   overlayGroups = c("Suivi Onde","Departements",'Zones alerte', "Masque"),
-                   options       = layersControlOptions(collapsed = TRUE)) %>% 
+
+  addProviderTiles(providers$Esri.WorldShadedRelief, 
+                     group = 'ESRI relief') %>%
+    addLayersControl(
+      baseGroups    = c("OSM", "Plan IGN", "Photo aérienne", "ESRI relief"),
+      overlayGroups = c("Suivi Onde", "Departements", 'Zones alerte', "Masque"),
+      options       = layersControlOptions(collapsed = TRUE)
+    ) %>% 
+
   hideGroup("Zones alerte") %>% 
   fitBounds(
     lng1 = bbox[["xmin"]],
@@ -234,7 +240,64 @@ popups_4mod <- file.path("www/png/4mod", list.files(path = "../www/png/4mod/", p
 
 ## Bilan régional
 
-### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre)** {.tabset}
+### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre `r unique(df_categ_obs_3mod$Annee)`)** {.tabset}
+
+```{r}
+plot_bilan_prop <- function(data_bilan, lib_ecoulement) {
+  data_bilan %>% 
+    ggplot() +
+    aes(
+      y = frq, 
+      x = forcats::fct_rev(factor(Mois)),
+      fill= forcats::fct_rev({{lib_ecoulement}}), 
+      label=Label_p
+      ) +
+    geom_bar(
+      position="stack", 
+      stat="identity",
+      alpha= 0.7, 
+      colour = 'black', 
+      width = 0.7, 
+      linewidth  = 0.01
+      ) +
+    facet_grid(~code_departement) +
+    ggrepel::geom_text_repel(
+      size=3,
+      color="black", 
+      fontface='bold.italic',
+      position = position_stack(vjust = 0.5)
+      ) +
+    coord_flip() +
+    ylab("Pourcentage (%)") +
+    xlab("Mois") +
+    ggplot2::scale_fill_manual(
+      name = "Situation stations",
+      values = c("Ecoulement visible" = "#4575b4",
+                 "Ecoulement visible acceptable" = "#4575b4",
+                 "Ecoulement visible faible" = "#bdd7e7",
+                 "Assec" = "#d73027",
+                 "Ecoulement non visible" = "#fe9929",
+                 "Observation impossible" = "grey50")
+      ) +
+    theme_bw() +
+    ggplot2::theme(
+      title = ggplot2::element_text(size = 11, face = "bold"), 
+      legend.text = ggplot2::element_text(size = 11),
+      legend.title = ggplot2::element_text(size = 11, face = 'bold'),
+      axis.text.y = ggplot2::element_text(size = 11, colour = 'black'),
+      axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
+      strip.text.x = element_text(size = 11, color = "black", face = "bold"),
+      strip.background = element_rect(
+        color="black", fill="grey80", size=1, linetype="solid"
+        ),
+      panel.grid.major = ggplot2::element_line(colour = NA),
+      panel.grid.minor = ggplot2::element_line(colour = NA),
+      legend.position = "bottom",
+      plot.background = ggplot2::element_blank(),
+      ) +
+    guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+}
+```
 
 <br>
 
@@ -243,145 +306,152 @@ popups_4mod <- file.path("www/png/4mod", list.files(path = "../www/png/4mod/", p
 ```{r bilan observation, fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
 #####-----------
 ### plot 3 modalites
-ggplot(df_categ_obs_3mod) +
-  aes(y = frq, x = forcats::fct_rev(factor(Mois)), fill= forcats::fct_rev(lib_ecoul3mod), label=Label_p) +
-  geom_bar(position="stack", stat="identity", alpha= 0.7, colour = 'black', width = 0.7, linewidth  = 0.01)+
-  facet_grid(~code_departement) +
-  ggrepel::geom_text_repel(size=3, color="black", fontface='bold.italic', position = position_stack(vjust = 0.5)) +
-  coord_flip() +
-  ylab("Pourcentage (%)") +
-  xlab("Mois") +
-  # labs(title = glue::glue("Bilan {max(df_categ_obs_3mod$Annee)} par d\u00e9partements"), 
-  #      subtitle = "Typologie nationale - Campagnes usuelles") +
-  ggplot2::scale_fill_manual(name = "Situation stations",
-                             values = c("Ecoulement visible" = "#4575b4",
-                                        "Ecoulement visible acceptable" = "#4575b4",
-                                        "Ecoulement visible faible" = "#bdd7e7",
-                                        "Assec" = "#d73027",
-                                        "Ecoulement non visible" = "#fe9929",
-                                        "Observation impossible" = "grey50")) +
-  theme_bw() +
-  ggplot2::theme(title = ggplot2::element_text(size = 11, face = "bold"), 
-                 legend.text = ggplot2::element_text(size = 11),
-                 legend.title = ggplot2::element_text(size = 11, face = 'bold'),
-                 axis.text.y = ggplot2::element_text(size = 11, colour = 'black'),
-                 axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
-                 strip.text.x = element_text(size = 11, color = "black", face = "bold"
-                 ),
-                 strip.background = element_rect(
-                   color="black", fill="grey80", size=1, linetype="solid"
-                 ),
-                 panel.grid.major = ggplot2::element_line(colour = NA),
-                 panel.grid.minor = ggplot2::element_line(colour = NA),
-                 legend.position = "bottom",
-                 plot.background = ggplot2::element_blank(),
-  ) +
-  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
-
+plot_bilan_prop(df_categ_obs_3mod, lib_ecoulement = lib_ecoul3mod)
 ```
 
 #### Typologie départementale
 
 ```{r fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
-ggplot(df_categ_obs_4mod) +
-  aes(y = frq, x = forcats::fct_rev(factor(Mois)), fill= forcats::fct_rev(lib_ecoul4mod), label=Label_p) +
-  geom_bar(position="stack", stat="identity", alpha= 0.7, colour = 'black', width = 0.7, linewidth  = 0.01)+
-  facet_grid(~code_departement) +
-  ggrepel::geom_text_repel(size=3, color="black", fontface='bold.italic', position = position_stack(vjust = 0.5)) +
-  coord_flip() +
-  ylab("Pourcentage (%)") +
-  xlab("Mois") +
-  # labs(title = glue::glue("Bilan {max(df_categ_obs_4mod$Annee)} par d\u00e9partements"), 
-  #      subtitle = "Typologie d\u00e9partementale - Campagnes usuelles") +
-  ggplot2::scale_fill_manual(name = "Situation stations",
-                             values = c("Ecoulement visible" = "#4575b4",
-                                        "Ecoulement visible acceptable" = "#4575b4",
-                                        "Ecoulement visible faible" = "#bdd7e7",
-                                        "Assec" = "#d73027",
-                                        "Ecoulement non visible" = "#fe9929",
-                                        "Observation impossible" = "grey50")) +
-  theme_bw() +
-  ggplot2::theme(title = ggplot2::element_text(size = 11, face = "bold"), 
-                 legend.text = ggplot2::element_text(size = 11),
-                 legend.title = ggplot2::element_text(size = 11, face = 'bold'),
-                 axis.text.y = ggplot2::element_text(size = 11, colour = 'black'),
-                 axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
-                 strip.text.x = element_text(size = 11, color = "black", face = "bold"
-                 ),
-                 strip.background = element_rect(
-                   color="black", fill="grey80", size=1, linetype="solid"
-                 ),
-                 panel.grid.major = ggplot2::element_line(colour = NA),
-                 panel.grid.minor = ggplot2::element_line(colour = NA),
-                 legend.position = "bottom",
-                 plot.background = ggplot2::element_blank(),
-
-  ) +
-  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+plot_bilan_prop(df_categ_obs_4mod, lib_ecoulement = lib_ecoul4mod)
 ```
 
 ### **Sévérité des assecs**
+
+```{r}
+plot_heatmap <- function(df_heatmap) {
+  df_heatmap %>% 
+    ggplot() + 
+    aes(
+      x = Annee, 
+      y = forcats::fct_rev(factor(Mois)),
+      fill=pourcentage_assecs
+      ) + 
+    geom_tile(col='white',size=0.5) +
+    scale_fill_gradientn(
+      "% d\'assecs",
+      colors = adjustcolor(hcl.colors(10, "RdYlBu",rev = T),alpha.f = 0.8),
+      limits=c(0,100),
+      na.value = adjustcolor("grey90",alpha.f = 0.7)
+      ) +
+    geom_text(
+      aes(label=Label_p),
+      size=3.5,
+      color="black",
+      fontface='bold.italic'
+      ) +
+    scale_size(guide='none') +
+    scale_x_continuous(breaks = scales::breaks_width(1),expand = c(0,0)) +
+    ylab("Mois") + 
+    xlab(NULL) +
+    ggtitle(glue::glue("Proportion de stations en assec")) +
+    theme_bw() +
+    theme(
+      title = element_text(size = 11,face = 'bold'), 
+      axis.text.x = element_text(size=11,angle = 45,hjust = 1),
+      axis.text.y = element_text(size=11),
+      legend.position = 'right',
+      axis.ticks = element_blank(),
+      panel.grid=element_blank()
+      )
+}
+```
 
 <br>
 
 ```{r bilan heatmap, fig.height = 5, fig.width = 9, align = "center", warning = FALSE}
 ###
-heatmap_df %>% 
-  ggplot() + 
-  aes(x = Annee, y = forcats::fct_rev(factor(Mois)), fill=pourcentage_assecs) + 
-  geom_tile(col='white',size=0.5) +
-  scale_fill_gradientn("% d\'assecs",
-                       colors = adjustcolor(hcl.colors(10, "RdYlBu",rev = T),alpha.f = 0.8),
-                       limits=c(0,100),na.value = adjustcolor("grey90",alpha.f = 0.7)) +
-  geom_text(aes(label=Label_p),size=3.5,color="black",fontface='bold.italic') +
-  #geom_text(aes(label = Label),size=3,color="black",fontface='italic') +
-  scale_size(guide='none') +
-  scale_x_continuous(breaks = scales::breaks_width(1),expand = c(0,0)) +
-  ylab("Mois") + 
-  xlab(NULL) +
-  ggtitle(glue::glue("Proportion de stations en assec")) +
-  # annotate("rect", xmin = 2022-0.5, xmax = 2022+0.49, ymin = 0.5, ymax = 5.5,
-  #          alpha = 0, color= "black",linetype = 2, size=1.2) +
-  theme_bw() +
-  theme(title = element_text(size = 11,face = 'bold'), 
-        axis.text.x = element_text(size=11,angle = 45,hjust = 1),
-        axis.text.y = element_text(size=11),
-        legend.position = 'right',
-        axis.ticks = element_blank(),
-        panel.grid=element_blank())
-
+plot_heatmap(heatmap_df)
 
 ```
 
 ### **Des assecs se suivant d'un mois sur l'autre**
 
+```{r}
+plot_assecs_consecutifs <- function(df_assecs, round_prec = 1) {
+  df_assecs %>%
+    filter(label != '0 mois') %>% 
+    ggplot() + 
+    aes(x = as.factor(Annee), y = pct, fill = max_nb_mois_assec) +
+    geom_bar(stat = "identity") +
+    geom_text(
+      aes(y = pct, label = nb_station), 
+      fontface="italic",
+      size=3.5,
+      position = position_stack(vjust = 0.5),
+      show.legend = FALSE
+      ) +
+    scale_fill_brewer(
+      "Nombre de campagnes\navec assec (mai-septembre)", 
+      palette = "YlOrRd",
+      direction = -1, 
+      labels=sort(unique(duree_assecs_df$label),decreasing = T)) +
+    scale_y_continuous(labels = scales::percent_format(round_prec)) +
+    ggtitle("Proportions et nombre de stations concernées") +
+    theme_bw() +
+    theme(
+      title = element_text(size = 11,face = 'bold'), 
+      axis.text.x = element_text(size = 11, angle = 45,hjust = 1),
+      axis.text.y = element_text(size=11),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank()
+      ) +
+    ylab(NULL) + 
+    xlab(NULL)
+}
+```
+
 <br>
 
 ```{r bilan duree, fig.height = 5, fig.width = 9, align = "center", warning = FALSE}
-duree_assecs_df %>%
-  filter(label != '0 mois') %>% 
-  ggplot() + aes(x = as.factor(Annee), y = pct, fill = max_nb_mois_assec) +
-  geom_bar(stat = "identity") +
-  geom_text(aes(y = pct, label = nb_station), 
-            fontface="italic",size=3.5,
-            position = position_stack(vjust = 0.5),
-            show.legend = FALSE) +
-  scale_fill_brewer("Nombre de campagnes\navec assec (mai-septembre)", 
-                    palette = "YlOrRd",
-                    direction = -1, 
-                    labels=sort(unique(duree_assecs_df$label),decreasing = T)) +
-  scale_y_continuous(labels = scales::percent_format(1)) +
-  ggtitle("Proportions et nombre de stations concernées") +
-  theme_bw() +
-  theme(title = element_text(size = 11,face = 'bold'), 
-        axis.text.x = element_text(size = 11, angle = 45,hjust = 1),
-        axis.text.y = element_text(size=11),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor = element_blank()) +
-  ylab(NULL) + 
-  xlab(NULL)
+
+plot_assecs_consecutifs(duree_assecs_df)
+```
+
+## Bilans départementaux {.tabset}
+
+```{r, results='asis'}
+for (d in depts_sel$code_insee) {
+  if (d %in% df_categ_obs_4mod$code_departement) {
+    cat(paste0("\n### ", d, "\n"))
+    
+    cat(paste0("#### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre ", unique(df_categ_obs_4mod$Annee)), ")**\n")
+    
+    print(
+      plot_bilan_prop(
+        df_categ_obs_4mod %>% 
+          dplyr::filter(code_departement == d), 
+        lib_ecoulement = lib_ecoul4mod
+        )
+    )
+    cat("\n")
+    
+    cat("\n#### **Sévérité des assecs**\n")
+    
+    print(
+      plot_heatmap(
+        heatmap_df_dep %>% 
+          dplyr::filter(code_departement == d)
+        )
+      )
+    
+    cat("\n")
+    
+    cat("\n#### **Des assecs se suivant d'un mois sur l'autre**\n")
+    
+    print(
+      plot_assecs_consecutifs(
+        duree_assecs_df_dep %>% 
+          dplyr::filter(code_departement == d),
+        round_prec = .1
+        )
+      )
+    
+    cat("\n")
+    }
+}
 
 ```
+
 
 ## Méthodologie
 
