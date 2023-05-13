@@ -127,9 +127,15 @@ finalize_map <- function(map, bbox) {
            attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
            group = "Photo aérienne"
   ) %>%
-  addLayersControl(baseGroups    = c("OSM","Plan IGN","Photo aérienne"),
-                   overlayGroups = c("Suivi Onde","Departements",'Zones alerte', "Masque"),
-                   options       = layersControlOptions(collapsed = TRUE)) %>% 
+
+  addProviderTiles(providers$Esri.WorldShadedRelief, 
+                     group = 'ESRI relief') %>%
+    addLayersControl(
+      baseGroups    = c("OSM", "Plan IGN", "Photo aérienne", "ESRI relief"),
+      overlayGroups = c("Suivi Onde", "Departements", 'Zones alerte', "Masque"),
+      options       = layersControlOptions(collapsed = TRUE)
+    ) %>% 
+
   hideGroup("Zones alerte") %>% 
   fitBounds(
     lng1 = bbox[["xmin"]],
