@@ -342,10 +342,12 @@ produire_graph_pour_une_station <-
       scale_fill_manual(values = couleurs, breaks = levels(prov$modalite), name = 'Modalités') +
       scale_shape_manual(values = c(21,22),name = 'Type campagne') +
       scale_size_manual(values = c(5,10),name = 'Type campagne') +
-      scale_y_continuous(breaks = 1:12, labels = 1:12) +
+      scale_y_continuous(breaks = 1:12, labels = 1:12, limits = c(1, 12)) +
       scale_x_continuous(breaks = min(prov$Annee, na.rm = T):max(prov$Annee, na.rm = T),
                          labels = min(prov$Annee, na.rm = T):max(prov$Annee, na.rm = T)) +
-      labs(x = "", y = "Mois", title = nom_station) +
+      labs(x = "", y = "Mois", 
+           title = unique(prov$libelle_station),
+           subtitle = unique(prov$code_station)) +
       theme_bw() +
       theme(title = element_text(face = 'bold'),
             axis.text.x = element_text(size=10),
@@ -357,6 +359,8 @@ produire_graph_pour_une_station <-
     graph1
   }
 
+list.files("www/png", recursive = TRUE, full.names = TRUE) %>% 
+  purrr::walk(file.remove)
 
 ### -> graphiques 3modalités
 graphiques_int_3mod <- 
@@ -367,6 +371,20 @@ graphiques_int_3mod <-
 
 names(graphiques_int_3mod) <- stations_onde_geo_usuelles$code_station
 
+purrr::walk(
+  names(graphiques_int_3mod),
+  function(station) {
+    ggplot2::ggsave(
+      plot = graphiques_int_3mod[[station]],
+      filename = paste0("www/png/3mod/", station, ".png"),
+      width = 14,
+      height = 10,
+      units = "cm",
+      dpi = 150
+    )
+  }
+  )
+
 ### -> graphiques 4modalités
 graphiques_int_4mod <- 
   purrr::map(.x = stations_onde_geo_usuelles$code_station, 
@@ -375,6 +393,20 @@ graphiques_int_4mod <-
              onde_df = onde_periode)
 
 names(graphiques_int_4mod) <- stations_onde_geo_usuelles$code_station
+
+purrr::walk(
+  names(graphiques_int_4mod),
+  function(station) {
+    ggplot2::ggsave(
+      plot = graphiques_int_4mod[[station]],
+      filename = paste0("www/png/4mod/", station, ".png"),
+      width = 14,
+      height = 10,
+      units = "cm",
+      dpi = 150
+    )
+  }
+)
 
 #####################################
 # Mise en forme des tableaux pour les graphiques bilan
@@ -437,6 +469,33 @@ heatmap_df <-
   # label (nb stations / nb total)
   dplyr::mutate(Label_p = ifelse(is.na(n_assecs),"",glue::glue("{round(pourcentage_assecs,0)}%")))
 
+heatmap_df_dep <-
+  onde_periode %>% 
+  filter(libelle_type_campagne == 'usuelle') %>% 
+  dplyr::group_by(code_departement) %>% 
+  dplyr::group_split(.keep = TRUE) %>% 
+  purrr::map_df(
+    function(df_dep) {
+      df_dep %>% 
+        dplyr::select(code_departement, code_station, libelle_station, Annee, Mois, lib_ecoul3mod) %>% 
+        dplyr::filter(Mois %in% c("05","06", "07", "08", "09")) %>%
+        dplyr::group_by(code_departement, Mois,Annee) %>%
+        dplyr::summarise(n_donnees = n(), 
+                         n_assecs = length(lib_ecoul3mod[lib_ecoul3mod == 'Assec'])) %>% 
+        dplyr::ungroup() %>% 
+        dplyr::mutate(pourcentage_assecs = round(n_assecs / n_donnees * 100, digits = 2),
+                      taille_point = sqrt(pourcentage_assecs+1)) %>% 
+        dplyr::arrange(Annee,Mois) %>% 
+        tidyr::complete(Annee,Mois) %>% 
+        dplyr::mutate(Mois = factor(Mois)) %>%
+        # label pourcentage
+        dplyr::mutate(Label = ifelse(is.na(n_assecs),"",glue::glue("{n_assecs}/{n_donnees}"))) %>% 
+        # label (nb stations / nb total)
+        dplyr::mutate(Label_p = ifelse(is.na(n_assecs),"",glue::glue("{round(pourcentage_assecs,0)}%")))
+    }
+  )
+  
+
 duree_assecs_df <-
   onde_periode %>% 
   filter(libelle_type_campagne == 'usuelle') %>% 
@@ -458,6 +517,46 @@ duree_assecs_df <-
                         paste0(max_nb_mois_assec, " mois"),
                         paste0(max_nb_mois_assec, " mois cons\u00e9cutifs")))
 
+duree_assecs_df_dep <-
+  onde_periode %>% 
+  filter(libelle_type_campagne == 'usuelle') %>% 
+  dplyr::filter(Mois %in% c("05","06", "07", "08", "09")) %>% 
+  dplyr::group_by(code_departement) %>% 
+  dplyr::group_split(.keep = TRUE) %>% 
+  purrr::map_df(
+    function(df_dep) {
+      df_dep %>% 
+        dplyr::select(
+          code_departement, code_station, libelle_station, 
+          Annee, Mois, lib_ecoul3mod, date_campagne
+          ) %>% 
+        mutate(mois_num = lubridate::month(date_campagne)) %>% 
+        as_tibble() %>%
+        arrange(code_station, date_campagne) %>% 
+        group_by(
+          code_station,
+          Annee, 
+          ID = data.table::rleid(code_station, lib_ecoul3mod == 'Assec' )
+          ) %>%
+        mutate(
+          mois_assec_consec = ifelse(lib_ecoul3mod == 'Assec', row_number(), 0L)) %>%
+        group_by(code_departement, Annee,code_station) %>% 
+        summarise(
+          max_nb_mois_assec  = max(mois_assec_consec),
+          .groups = "drop"
+          ) %>% 
+        group_by(code_departement, Annee, max_nb_mois_assec) %>%
+        summarise(nb_station = n(), .groups = "drop") %>% 
+        mutate(pct=prop.table(nb_station)) %>% 
+        mutate(label = ifelse(max_nb_mois_assec == '1' | max_nb_mois_assec == '0',
+                              paste0(max_nb_mois_assec, " mois"),
+                              paste0(max_nb_mois_assec, " mois cons\u00e9cutifs"))
+               )
+      }
+  ) %>% 
+  mutate(max_nb_mois_assec = factor(max_nb_mois_assec,ordered = T)) %>% 
+  mutate(max_nb_mois_assec = fct_rev(max_nb_mois_assec))
+  
 #####################################
 ## Donnees Propluvia
 load(file = 'data/raw_data/propluvia_zone.Rdata')
@@ -471,14 +570,16 @@ propluvia <-
 #####################################
 # Sauvegarde des objets pour page Rmd
 save(stations_onde_geo_usuelles, 
-     graphiques_int_3mod,
-     graphiques_int_4mod,
+     # graphiques_int_3mod,
+     # graphiques_int_4mod,
      onde_dernieres_campagnes,
      onde_dernieres_campagnes_usuelles, 
      onde_dernieres_campagnes_comp,
      df_categ_obs_3mod,
      df_categ_obs_4mod,
      heatmap_df,
+     heatmap_df_dep,
      duree_assecs_df,
+     duree_assecs_df_dep,
      propluvia,
      file = "data/processed_data/map_data_cartoMod.RData")                     
