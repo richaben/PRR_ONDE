@@ -48,7 +48,7 @@ library(data.table)
 `%ni%` <- Negate(`%in%`)
 
 load(file = "../data/processed_data/map_data_cartoMod.RData")
-load(file = "../data/raw_data/departement_shape.RData")
+load(file = "../data/raw_data/masks.Rdata")
 source("../_config.R")
 
 ```
@@ -96,16 +96,18 @@ Les **observations impossibles** et **données manquantes** sont également repr
 <br>
 
 ```{r include=FALSE}
-masque_metropole <- depts %>% 
-  filter(code_insee %ni% conf_dep) %>% 
-  filter(code_insee %ni% c(971:976)) %>% 
-  summarise() %>% 
-  sf::st_transform(crs = 4326)
-
 depts_sel <- depts %>%
       filter(code_insee %in% conf_dep) %>% 
   sf::st_transform(crs = 4326)
 depts_sel_bbox <- sf::st_bbox(depts_sel)
+
+masque_eu <- other_eu_countries %>% 
+  sf::st_transform(crs = 4326) %>% 
+  sf::st_difference(
+    depts_sel %>% 
+      dplyr::summarise()
+  )
+
 ```
 
 ```{r include=FALSE}
@@ -126,7 +128,7 @@ finalize_map <- function(map, bbox) {
            group = "Photo aérienne"
   ) %>%
   addLayersControl(baseGroups    = c("OSM","Plan IGN","Photo aérienne"),
-                   overlayGroups = c("Assecs","Departements",'Zones alerte'),
+                   overlayGroups = c("Suivi Onde","Departements",'Zones alerte', "Masque"),
                    options       = layersControlOptions(collapsed = TRUE)) %>% 
   hideGroup("Zones alerte") %>% 
   fitBounds(
@@ -143,7 +145,8 @@ finalize_map <- function(map, bbox) {
 ```{r include=FALSE}
 map_situation <- 
   mapview::mapview(
-    masque_metropole,
+    masque_eu,
+    layer.name = "Masque",
     alpha.regions = .75,
     legend = FALSE,
     homebutton = FALSE,
@@ -178,7 +181,7 @@ map_situation <-
 ```{r cartoDynamique 3mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
 (map_situation +
   mapview(stations_onde_geo_map1, cex = "pourcentage_assecs",
-          layer.name = "Assecs",
+          layer.name = "Suivi Onde",
           legend = FALSE,
           alpha.regions = 0.9,
           zcol = "label_point",
@@ -193,7 +196,7 @@ map_situation <-
 ```{r cartoDynamique 4mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
 (map_situation +
   mapview(stations_onde_geo_map1, cex = "pourcentage_assecs",
-          layer.name = "Assecs",
+          layer.name = "Suivi Onde",
           legend = FALSE,
           alpha.regions = 0.9,
           zcol = "label_point",
