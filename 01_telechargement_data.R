@@ -46,7 +46,8 @@ campagnes <- map_df(.x = dpt_sel,
                         date_campagne_max = date_jour
                       )
                     )) %>% 
-  mutate(code_campagne = as.character(code_campagne))
+  mutate(code_campagne = as.character(code_campagne)) %>% 
+  dplyr::distinct()
 
 #### infos stations
 param_stations <- 
@@ -58,7 +59,8 @@ stations <- map_df(.x = dpt_sel,
                    function(x) get_ecoulement_stations(
                      list(code_departement = x,
                           fields = param_stations)
-                   ))
+                   )) %>% 
+  dplyr::distinct()
 
 #### infos observations
 param_obs <- 
@@ -73,7 +75,8 @@ observations <- map_df(.x = dpt_sel,
                               date_observation_max = date_jour,
                               fields = param_obs)
                        )) %>% 
-  mutate(code_campagne = as.character(code_campagne))
+  mutate(code_campagne = as.character(code_campagne)) %>% 
+  dplyr::distinct()
 
 ### Assemblage des données stations, observations, campagnes ----
 onde_df <-
@@ -538,12 +541,14 @@ heatmap_df_dep <-
 
 duree_assecs_df <-
   onde_periode %>% 
-  filter(libelle_type_campagne == 'usuelle') %>% 
-  dplyr::select(code_station, libelle_station, Annee, Mois, lib_ecoul3mod, date_campagne) %>% 
-  dplyr::filter(Mois %in% c("05","06", "07", "08", "09")) %>% 
-  mutate(mois_num = lubridate::month(date_campagne)) %>% 
+  filter(
+    libelle_type_campagne == 'usuelle',
+    Mois %in% c("05","06", "07", "08", "09")
+    ) %>% 
+  dplyr::distinct(code_station, libelle_station, Annee, Mois, lib_ecoul3mod) %>% 
+  mutate(mois_num = as.numeric(Mois)) %>% 
   as_tibble() %>%
-  arrange(code_station, date_campagne) %>% 
+  arrange(code_station, Annee, Mois) %>% 
   group_by(code_station,Annee, ID = data.table::rleid(code_station,lib_ecoul3mod == 'Assec' )) %>%
   mutate(mois_assec_consec = ifelse(lib_ecoul3mod == 'Assec', row_number(), 0L)) %>% 
   group_by(Annee,code_station) %>% 
@@ -559,20 +564,20 @@ duree_assecs_df <-
 
 duree_assecs_df_dep <-
   onde_periode %>% 
-  filter(libelle_type_campagne == 'usuelle') %>% 
-  dplyr::filter(Mois %in% c("05","06", "07", "08", "09")) %>% 
+  filter(
+    libelle_type_campagne == 'usuelle',
+    Mois %in% c("05","06", "07", "08", "09")
+  ) %>% 
   dplyr::group_by(code_departement) %>% 
   dplyr::group_split(.keep = TRUE) %>% 
   purrr::map_df(
     function(df_dep) {
       df_dep %>% 
-        dplyr::select(
-          code_departement, code_station, libelle_station, 
-          Annee, Mois, lib_ecoul3mod, date_campagne
-          ) %>% 
-        mutate(mois_num = lubridate::month(date_campagne)) %>% 
+        dplyr::distinct(code_departement, code_station, libelle_station, 
+                        Annee, Mois, lib_ecoul3mod) %>% 
+        mutate(mois_num = as.numeric(Mois)) %>% 
         as_tibble() %>%
-        arrange(code_station, date_campagne) %>% 
+        arrange(code_station, Annee, Mois) %>% 
         group_by(
           code_station,
           Annee, 
