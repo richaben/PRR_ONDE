@@ -243,7 +243,7 @@ popups_4mod <- file.path("www/png/4mod", list.files(path = "../www/png/4mod/", p
 ### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre `r unique(df_categ_obs_3mod$Annee)`)** {.tabset}
 
 ```{r}
-plot_bilan_prop <- function(data_bilan, lib_ecoulement) {
+plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
   data_bilan %>% 
     ggplot() +
     aes(
@@ -260,7 +260,8 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement) {
       width = 0.7, 
       linewidth  = 0.01
       ) +
-    facet_grid(~code_departement) +
+    {if(regional == FALSE)
+      facet_grid(~code_departement)} +
     ggrepel::geom_text_repel(
       size=3,
       color="black", 
@@ -306,13 +307,13 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement) {
 ```{r bilan observation, fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
 #####-----------
 ### plot 3 modalites
-plot_bilan_prop(df_categ_obs_3mod, lib_ecoulement = lib_ecoul3mod)
+plot_bilan_prop(df_categ_obs_3mod_reg, lib_ecoulement = lib_ecoul3mod, regional = T)
 ```
 
 #### Typologie départementale
 
 ```{r fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
-plot_bilan_prop(df_categ_obs_4mod, lib_ecoulement = lib_ecoul4mod)
+plot_bilan_prop(df_categ_obs_4mod_reg, lib_ecoulement = lib_ecoul4mod, regional = T)
 ```
 
 ### **Sévérité des assecs**

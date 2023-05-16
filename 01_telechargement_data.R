@@ -411,6 +411,46 @@ purrr::walk(
 #####################################
 # Mise en forme des tableaux pour les graphiques bilan
 
+## -> à la région
+df_categ_obs_3mod_reg <-
+  onde_periode %>% 
+  filter(libelle_type_campagne == 'usuelle') %>% 
+  filter(Annee == max(Annee)) %>% 
+  filter(Mois %in% c('05','06','07','08','09')) %>% 
+  group_by(Mois, Annee, lib_ecoul3mod) %>% 
+  summarise(NB = n()) %>% 
+  mutate(frq = NB / sum(NB) *100) %>% 
+  arrange(Mois) %>% 
+  mutate(lib_ecoul3mod = factor(lib_ecoul3mod, levels = c("Ecoulement visible",
+                                                          #"Ecoulement visible faible",
+                                                          "Ecoulement non visible",
+                                                          "Assec"), ordered = T)) %>% 
+  #dplyr::mutate(Mois = lubridate::month(as.numeric(Mois),label=T, abbr = T)) %>% 
+  # label pourcentage
+  dplyr::mutate(Label = ifelse(is.na(NB),"",glue::glue("{NB}"))) %>% 
+  # label (nb stations / nb total)
+  dplyr::mutate(Label_p = ifelse(is.na(frq),"",glue::glue("{round(frq,0)}%"))) 
+
+df_categ_obs_4mod_reg <-
+  onde_periode %>% 
+  filter(libelle_type_campagne == 'usuelle') %>% 
+  filter(Annee == max(Annee)) %>% 
+  filter(Mois %in% c('05','06','07','08','09')) %>% 
+  group_by(Mois, Annee, lib_ecoul4mod) %>% 
+  summarise(NB = n()) %>% 
+  mutate(frq = NB / sum(NB) *100) %>% 
+  arrange(Mois) %>% 
+  mutate(lib_ecoul4mod = factor(lib_ecoul4mod, levels = c("Ecoulement visible acceptable",
+                                                          "Ecoulement visible faible",
+                                                          "Ecoulement non visible",
+                                                          "Assec"), ordered = T)) %>% 
+  #dplyr::mutate(Mois = lubridate::month(as.numeric(Mois),label=T, abbr = T)) %>% 
+  # label pourcentage
+  dplyr::mutate(Label = ifelse(is.na(NB),"",glue::glue("{NB}"))) %>% 
+  # label (nb stations / nb total)
+  dplyr::mutate(Label_p = ifelse(is.na(frq),"",glue::glue("{round(frq,0)}%"))) 
+
+## -> par département
 df_categ_obs_3mod <-
   onde_periode %>% 
   filter(libelle_type_campagne == 'usuelle') %>% 
@@ -576,7 +616,9 @@ save(stations_onde_geo_usuelles,
      onde_dernieres_campagnes_usuelles, 
      onde_dernieres_campagnes_comp,
      df_categ_obs_3mod,
+     df_categ_obs_3mod_reg,
      df_categ_obs_4mod,
+     df_categ_obs_4mod_reg,
      heatmap_df,
      heatmap_df_dep,
      duree_assecs_df,
