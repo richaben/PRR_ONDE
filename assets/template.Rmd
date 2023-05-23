@@ -370,9 +370,17 @@ plot_heatmap(heatmap_df)
 ```{r}
 plot_assecs_consecutifs <- function(df_assecs, round_prec = 1) {
   df_assecs %>%
+    ungroup() %>% 
     filter(label != '0 mois') %>% 
+    mutate(label = factor(
+      label, 
+      levels = c(
+        paste0(5:2, " mois consécutifs"), "1 mois"
+        )
+      )
+      ) %>% 
     ggplot() + 
-    aes(x = as.factor(Annee), y = pct, fill = max_nb_mois_assec) +
+    aes(x = as.factor(Annee), y = pct, fill = label) +
     geom_bar(stat = "identity") +
     geom_text(
       aes(y = pct, label = nb_station), 
@@ -381,11 +389,16 @@ plot_assecs_consecutifs <- function(df_assecs, round_prec = 1) {
       position = position_stack(vjust = 0.5),
       show.legend = FALSE
       ) +
-    scale_fill_brewer(
-      "Nombre de campagnes\navec assec (mai-septembre)", 
-      palette = "YlOrRd",
-      direction = -1, 
-      labels=sort(unique(duree_assecs_df$label),decreasing = T)) +
+    scale_fill_manual(
+      values = c(
+        "1 mois" = "#FFFFB2FF",
+        "2 mois consécutifs" = "#FECC5CFF",
+        "3 mois consécutifs" = "#FD8D3CFF",
+        "4 mois consécutifs" = "#F03B20FF",
+        "5 mois consécutifs" = "#BD0026FF"
+          ),
+      drop = FALSE
+      ) +
     scale_y_continuous(labels = scales::percent_format(round_prec)) +
     ggtitle("Proportions et nombre de stations concernées") +
     theme_bw() +
