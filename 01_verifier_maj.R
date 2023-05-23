@@ -24,6 +24,7 @@ if (!file.exists("data/onde_data/onde.csv") |
       dplyr::ungroup() %>% 
       dplyr::distinct(code_departement, date_campagne) %>% 
       dplyr::rename(old = date_campagne)
+  
   to_update <- dplyr::left_join(
     x = old_data,
     y = purrr::map_df(
