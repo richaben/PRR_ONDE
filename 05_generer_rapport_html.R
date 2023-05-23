@@ -8,9 +8,6 @@
 
 print("Creation du fichier html !")
 
-library(tidyverse)
-library(rmarkdown)
-
 source("_config.R")
 
 rmarkdown::render("assets/template.Rmd", 
@@ -19,4 +16,4 @@ rmarkdown::render("assets/template.Rmd",
                     set_author = conf_auteur,
                     set_title = conf_titre
                   ),
-                  quiet = T)
+                  quiet = TRUE)
