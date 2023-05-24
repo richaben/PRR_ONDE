@@ -24,6 +24,7 @@ knitr::opts_chunk$set(echo      = FALSE,
                       cache = F,
                       dev = "ragg_png"
                       )
+import::from("dplyr", "%>%")
 ```
 
 ```{r, eval = FALSE, echo = FALSE}
@@ -33,40 +34,11 @@ htmltools::img(src = knitr::image_uri('logo_OFB_v2.png'),
 ```
 
 ```{r traitement, include=FALSE,echo = FALSE}
-library(tidyverse)
-library(ondetools)
-library(sf)
-library(mapview)
-library(leaflet)
-library(leaflet.extras)
-library(forcats)
-library(ggrepel)
-library(glue)
-library(scales)
-library(data.table)
-
 `%ni%` <- Negate(`%in%`)
 
-load(file = "../data/processed_data/map_data_cartoMod.RData")
-load(file = "../data/raw_data/masks.Rdata")
 source("../_config.R")
-
-```
-
-```{r, include=FALSE}
-stations_onde_geo_map1 <-
-  stations_onde_geo_usuelles %>% 
-  left_join(onde_dernieres_campagnes %>% select(code_station, Couleur, date_campagne, label_point))
-
-date_derniere_campagne_usuelle <- 
-  unique(onde_dernieres_campagnes_usuelles$Mois_campagne) %>% 
-  max() %>% 
-  format("%m/%Y") 
-
-date_derniere_campagne_comp <- 
-  unique(onde_dernieres_campagnes_comp$Mois_campagne) %>% 
-  max() %>% 
-  format("%m/%Y")
+load("../data/processed_data/graphiques.rda")
+load("../data/processed_data/donnees_cartes.rda")
 ```
 
 ⚠️ Les données ci-dessous concernent les observations réalisées au plus tard :
@@ -95,370 +67,195 @@ Les **observations impossibles** et **données manquantes** sont également repr
 
 <br>
 
-```{r include=FALSE}
-depts_sel <- depts %>%
-      filter(code_insee %in% conf_dep) %>% 
-  sf::st_transform(crs = 4326)
-depts_sel_bbox <- sf::st_bbox(depts_sel)
-
-masque_eu <- other_eu_countries %>% 
-  sf::st_transform(crs = 4326) %>% 
-  sf::st_difference(
-    depts_sel %>% 
-      dplyr::summarise()
-  )
-
-```
-
-```{r include=FALSE}
-finalize_map <- function(map, bbox) {
-  map@map <- map@map %>% 
-  addTiles(group = "OSM") %>%
-  #addProviderTiles(providers$CartoDB.PositronOnlyLabels, group = "Villes") %>% 
-  addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
-           options = c(WMSTileOptions(tileSize = 256),
-                       providerTileOptions(minZoom = 1, maxZoom = 15)),
-           attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
-           group = "Plan IGN"
-  ) %>%
-  addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
-           options = c(WMSTileOptions(tileSize = 256),
-                       providerTileOptions(minZoom = 1, maxZoom = 22)),
-           attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
-           group = "Photo aérienne"
-  ) %>%
-
-  addProviderTiles(providers$Esri.WorldShadedRelief, 
-                     group = 'ESRI relief') %>%
-    addLayersControl(
-      baseGroups    = c("OSM", "Plan IGN", "Photo aérienne", "ESRI relief"),
-      overlayGroups = c("Suivi Onde", "Departements", 'Zones alerte', "Masque"),
-      options       = layersControlOptions(collapsed = TRUE)
-    ) %>% 
-
-  hideGroup("Zones alerte") %>% 
-  fitBounds(
-    lng1 = bbox[["xmin"]],
-    lat1 = bbox[["ymin"]],
-    lng2 = bbox[["xmax"]],
-    lat2 = bbox[["ymax"]]
-  )
-  
-  map
-}
-```
-
-```{r include=FALSE}
-map_situation <- 
-  mapview::mapview(
-    masque_eu,
-    layer.name = "Masque",
-    alpha.regions = .75,
-    legend = FALSE,
-    homebutton = FALSE,
-    stroke = FALSE,
-    col.regions = "white",
-    label = "",
-    popup = FALSE
-  ) +
-  mapview::mapview(
-    depts_sel %>% 
-      dplyr::mutate(
-        label_dept = paste0(nom, " (", code_insee, ")")
-      ),
-    alpha.regions = 0,
-    legend = FALSE, 
-    layer.name = "Departements", zcol = "label_dept",
-    homebutton = FALSE,stroke = TRUE,color="black", lwd = 2,
-    popup = FALSE
-    ) +
-  mapview(
-    propluvia, zcol = "libel",
-    alpha.regions = 0.10,
-    legend = FALSE, col.regions = 'black',
-    layer.name = "Zones alerte",homebutton = FALSE,stroke = TRUE,color="black",
-    popup = FALSE
-    )
-
-```
-
 ### Typologie nationale
 
-```{r cartoDynamique 3mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
-popups_3mod <- file.path("www/png/3mod", list.files(path = "../www/png/3mod/", pattern = ".png")) %>% 
-  (function(x) {
-    names(x) <- x %>% 
-      stringr::str_remove_all(pattern = "www/png/3mod/") %>% 
-      stringr::str_remove_all(pattern = ".png")
-    
-    x
-  })
-
-(map_situation +
-  mapview(stations_onde_geo_map1, cex = "pourcentage_assecs",
-          layer.name = "Suivi Onde",
-          legend = FALSE,
-          alpha.regions = 0.9,
-          zcol = "label_point",
-          # popup = leafpop::popupGraph(graphiques_int_3mod, width = 400, height = 350),
-          popup = leafpop::popupImage(
-            popups_3mod[stations_onde_geo_map1$code_station],
-            height = 290, width = 400
-          ),
-          col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
-  finalize_map(bbox = depts_sel_bbox)
+```{r}
+  ### Carte de base
+  map_situation <- 
+    mapview::mapview(
+      masque_eu,
+      layer.name = "Masque",
+      alpha.regions = .75,
+      legend = FALSE,
+      homebutton = FALSE,
+      stroke = FALSE,
+      col.regions = "white",
+      label = "",
+      popup = FALSE
+    ) +
+    mapview::mapview(
+      depts_sel %>% 
+        dplyr::mutate(
+          label_dept = paste0(nom, " (", code_insee, ")")
+        ),
+      alpha.regions = 0,
+      legend = FALSE, 
+      layer.name = "Departements", zcol = "label_dept",
+      homebutton = FALSE,stroke = TRUE,color="black", lwd = 2,
+      popup = FALSE
+    ) +
+    mapview::mapview(
+      propluvia, zcol = "libel",
+      alpha.regions = 0.10,
+      legend = FALSE, col.regions = 'black',
+      layer.name = "Zones alerte",homebutton = FALSE,stroke = TRUE,color="black",
+      popup = FALSE
+    )
   
+  ### Finalisation des cartes
+  finalize_map <- function(map, bbox) {
+    map@map <- map@map %>% 
+      leaflet::addTiles(group = "OSM") %>%
+      leaflet::addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+               options = c(leaflet::WMSTileOptions(tileSize = 256),
+                           leaflet::providerTileOptions(minZoom = 1, maxZoom = 15)),
+               attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+               group = "Plan IGN"
+      ) %>%
+      leaflet::addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+               options = c(leaflet::WMSTileOptions(tileSize = 256),
+                           leaflet::providerTileOptions(minZoom = 1, maxZoom = 22)),
+               attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+               group = "Photo aérienne"
+      ) %>%
+      
+      leaflet::addProviderTiles(leaflet::providers$Esri.WorldShadedRelief, 
+                       group = 'ESRI relief') %>%
+      leaflet::addLayersControl(
+        baseGroups    = c("OSM", "Plan IGN", "Photo aérienne", "ESRI relief"),
+        overlayGroups = c("Suivi Onde", "Departements", 'Zones alerte', "Masque"),
+        options       = leaflet::layersControlOptions(collapsed = TRUE)
+      ) %>% 
+      
+      leaflet::hideGroup("Zones alerte") %>% 
+      leaflet::fitBounds(
+        lng1 = bbox[["xmin"]],
+        lat1 = bbox[["ymin"]],
+        lng2 = bbox[["xmax"]],
+        lat2 = bbox[["ymax"]]
+      )
+    
+    map
+  }
+  
+  popups_3mod <- file.path(
+    "www/png/3mod", 
+    list.files(path = "../www/png/3mod/", pattern = ".png")
+    ) %>% 
+    (function(x) {
+      names(x) <- x %>% 
+        stringr::str_remove_all(pattern = "www/png/3mod/") %>% 
+        stringr::str_remove_all(pattern = ".png")
+      
+      x
+    })
+  
+  
+  popups_4mod <- file.path(
+    "www/png/4mod", 
+    list.files(path = "../www/png/4mod/", pattern = ".png")
+    ) %>% 
+    (function(x) {
+      names(x) <- x %>% 
+        stringr::str_remove_all(pattern = "www/png/4mod/") %>% 
+        stringr::str_remove_all(pattern = ".png")
+      
+      x
+    })
+
+```
+
+```{r cartoDynamique 3mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
+  (map_situation +
+      mapview::mapview(
+        stations_onde_geo_map1, cex = "pourcentage_assecs",
+        layer.name = "Suivi Onde",
+        legend = FALSE,
+        alpha.regions = 0.9,
+        zcol = "label_point",
+        popup = leafpop::popupImage(
+          popups_3mod[stations_onde_geo_map1$code_station],
+          height = 290, width = 400
+          ),
+        col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
+  finalize_map(bbox = depts_sel_bbox)
+
 ```
 
 ### Typologie départementale
 
 ```{r cartoDynamique 4mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
-popups_4mod <- file.path("www/png/4mod", list.files(path = "../www/png/4mod/", pattern = ".png")) %>% 
-  (function(x) {
-    names(x) <- x %>% 
-      stringr::str_remove_all(pattern = "www/png/4mod/") %>% 
-      stringr::str_remove_all(pattern = ".png")
-    
-    x
-  })
-
 (map_situation +
-  mapview(stations_onde_geo_map1, cex = "pourcentage_assecs",
-          layer.name = "Suivi Onde",
-          legend = FALSE,
-          alpha.regions = 0.9,
-          zcol = "label_point",
-          popup = leafpop::popupImage(
-            popups_4mod[stations_onde_geo_map1$code_station],
-            height = 290, width = 400
+      mapview::mapview(
+        stations_onde_geo_map1, cex = "pourcentage_assecs",
+        layer.name = "Suivi Onde",
+        legend = FALSE,
+        alpha.regions = 0.9,
+        zcol = "label_point",
+        popup = leafpop::popupImage(
+          popups_4mod[stations_onde_geo_map1$code_station],
+          height = 290, width = 400
           ),
-          # popup = leafpop::popupGraph(graphiques_int_4mod, width = 400, height = 350),
-          col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
+        col.regions = stations_onde_geo_map1$Couleur, homebutton = T)) %>% 
   finalize_map(bbox = depts_sel_bbox)
-
 ```
 
 ## Bilan régional
 
-### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre `r unique(df_categ_obs_3mod$Annee)`)** {.tabset}
-
-```{r}
-plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
-  data_bilan %>% 
-    ggplot() +
-    aes(
-      y = frq, 
-      x = forcats::fct_rev(factor(Mois)),
-      fill= forcats::fct_rev({{lib_ecoulement}}), 
-      label=Label_p
-      ) +
-    geom_bar(
-      position="stack", 
-      stat="identity",
-      alpha= 0.7, 
-      colour = 'black', 
-      width = 0.7, 
-      linewidth  = 0.01
-      ) +
-    {if(regional == FALSE)
-      facet_grid(~code_departement)} +
-    ggrepel::geom_text_repel(
-      size=3,
-      color="black", 
-      fontface='bold.italic',
-      position = position_stack(vjust = 0.5)
-      ) +
-    coord_flip() +
-    ylab("Pourcentage (%)") +
-    xlab("Mois") +
-    ggplot2::scale_fill_manual(
-      name = "Situation stations",
-      values = c("Ecoulement visible" = "#4575b4",
-                 "Ecoulement visible acceptable" = "#4575b4",
-                 "Ecoulement visible faible" = "#bdd7e7",
-                 "Assec" = "#d73027",
-                 "Ecoulement non visible" = "#fe9929",
-                 "Observation impossible" = "grey50")
-      ) +
-    theme_bw() +
-    ggplot2::theme(
-      title = ggplot2::element_text(size = 11, face = "bold"), 
-      legend.text = ggplot2::element_text(size = 11),
-      legend.title = ggplot2::element_text(size = 11, face = 'bold'),
-      axis.text.y = ggplot2::element_text(size = 11, colour = 'black'),
-      axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
-      strip.text.x = element_text(size = 11, color = "black", face = "bold"),
-      strip.background = element_rect(
-        color="black", fill="grey80", size=1, linetype="solid"
-        ),
-      panel.grid.major = ggplot2::element_line(colour = NA),
-      panel.grid.minor = ggplot2::element_line(colour = NA),
-      legend.position = "bottom",
-      plot.background = ggplot2::element_blank(),
-      ) +
-    guides(fill = guide_legend(nrow = 2, byrow = TRUE))
-}
-```
+### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre `r unique(df_categ_obs_4mod$Annee)`)** {.tabset}
 
 <br>
 
 #### Typologie nationale
 
 ```{r bilan observation, fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
-#####-----------
-### plot 3 modalites
-plot_bilan_prop(df_categ_obs_3mod_reg, lib_ecoulement = lib_ecoul3mod, regional = T)
+bilan_cond_reg_typo_nat
 ```
 
 #### Typologie départementale
 
 ```{r fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
-plot_bilan_prop(df_categ_obs_4mod_reg, lib_ecoulement = lib_ecoul4mod, regional = T)
+bilan_cond_reg_typo_dep
 ```
 
 ### **Sévérité des assecs**
 
-```{r}
-plot_heatmap <- function(df_heatmap) {
-  df_heatmap %>% 
-    ggplot() + 
-    aes(
-      x = Annee, 
-      y = forcats::fct_rev(factor(Mois)),
-      fill=pourcentage_assecs
-      ) + 
-    geom_tile(col='white',size=0.5) +
-    scale_fill_gradientn(
-      "% d\'assecs",
-      colors = adjustcolor(hcl.colors(10, "RdYlBu",rev = T),alpha.f = 0.8),
-      limits=c(0,100),
-      na.value = adjustcolor("grey90",alpha.f = 0.7)
-      ) +
-    geom_text(
-      aes(label=Label_p),
-      size=3.5,
-      color="black",
-      fontface='bold.italic'
-      ) +
-    scale_size(guide='none') +
-    scale_x_continuous(breaks = scales::breaks_width(1),expand = c(0,0)) +
-    ylab("Mois") + 
-    xlab(NULL) +
-    ggtitle(glue::glue("Proportion de stations en assec")) +
-    theme_bw() +
-    theme(
-      title = element_text(size = 11,face = 'bold'), 
-      axis.text.x = element_text(size=11,angle = 45,hjust = 1),
-      axis.text.y = element_text(size=11),
-      legend.position = 'right',
-      axis.ticks = element_blank(),
-      panel.grid=element_blank()
-      )
-}
-```
-
 <br>
 
 ```{r bilan heatmap, fig.height = 5, fig.width = 9, align = "center", warning = FALSE}
-###
-plot_heatmap(heatmap_df)
-
+severite_assecs_reg
 ```
 
 ### **Des assecs se suivant d'un mois sur l'autre**
 
-```{r}
-plot_assecs_consecutifs <- function(df_assecs, round_prec = 1) {
-  df_assecs %>%
-    ungroup() %>% 
-    filter(label != '0 mois') %>% 
-    mutate(label = factor(
-      label, 
-      levels = c(
-        paste0(5:2, " mois consécutifs"), "1 mois"
-        )
-      )
-      ) %>% 
-    ggplot() + 
-    aes(x = as.factor(Annee), y = pct, fill = label) +
-    geom_bar(stat = "identity") +
-    geom_text(
-      aes(y = pct, label = nb_station), 
-      fontface="italic",
-      size=3.5,
-      position = position_stack(vjust = 0.5),
-      show.legend = FALSE
-      ) +
-    scale_fill_manual(
-      values = c(
-        "1 mois" = "#FFFFB2FF",
-        "2 mois consécutifs" = "#FECC5CFF",
-        "3 mois consécutifs" = "#FD8D3CFF",
-        "4 mois consécutifs" = "#F03B20FF",
-        "5 mois consécutifs" = "#BD0026FF"
-          ),
-      drop = FALSE
-      ) +
-    scale_y_continuous(labels = scales::percent_format(round_prec)) +
-    ggtitle("Proportions et nombre de stations concernées") +
-    theme_bw() +
-    theme(
-      title = element_text(size = 11,face = 'bold'), 
-      axis.text.x = element_text(size = 11, angle = 45,hjust = 1),
-      axis.text.y = element_text(size=11),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor = element_blank()
-      ) +
-    ylab(NULL) + 
-    xlab(NULL)
-}
-```
-
 <br>
 
 ```{r bilan duree, fig.height = 5, fig.width = 9, align = "center", warning = FALSE}
-
-plot_assecs_consecutifs(duree_assecs_df)
+assecs_consecutifs_reg
 ```
 
 ## Bilans départementaux {.tabset}
 
 ```{r, results='asis'}
-for (d in depts_sel$code_insee) {
+for (d in conf_dep) {
   if (d %in% df_categ_obs_4mod$code_departement) {
     cat(paste0("\n### ", d, "\n"))
     
     cat(paste0("#### **Conditions d'écoulement lors des campagnes usuelles (mai à septembre ", unique(df_categ_obs_4mod$Annee)), ")**\n")
     
-    print(
-      plot_bilan_prop(
-        df_categ_obs_4mod %>% 
-          dplyr::filter(code_departement == d), 
-        lib_ecoulement = lib_ecoul4mod
-        )
-    )
+    print(bilan_cond_dep[[d]])
+    
     cat("\n")
     
     cat("\n#### **Sévérité des assecs**\n")
     
-    print(
-      plot_heatmap(
-        heatmap_df_dep %>% 
-          dplyr::filter(code_departement == d)
-        )
-      )
+    print(severite_assecs_dep[[d]])
     
     cat("\n")
     
     cat("\n#### **Des assecs se suivant d'un mois sur l'autre**\n")
     
-    print(
-      plot_assecs_consecutifs(
-        duree_assecs_df_dep %>% 
-          dplyr::filter(code_departement == d),
-        round_prec = .1
-        )
-      )
+    print(assecs_consecutifs_dep[[d]])
     
     cat("\n")
     }

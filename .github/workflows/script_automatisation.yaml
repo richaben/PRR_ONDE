@@ -21,23 +21,34 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: |
-            any::tidyverse
             any::devtools
             
       - uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: '2.17.1' # Pandoc version pour compiler.
           
-      - name: Installation packages in dev
+      - name: Installation dependencies in dev
         run: Rscript -e 'devtools::install_github("richaben/ondetools")'
         
-      - name: Install dependencies
+      - name: Installation dependencies
+        run: | 
+          Rscript "00_installation_packages.R"
+        
+      - name: Verifier maj
         run: |
-          install.packages(c("hubeau", "leaflet", "leaflet.extras","ggrepel", "scales", "data.table"))
-        shell: Rscript {0}
-      - name: Execute Scripts Telechargement et Mise en forme
+          Rscript "01_verifier_maj.R"
+          
+      - name: Telechargement donnees
         run: |
-          Rscript "01_telechargement_data.R"
+          Rscript "02_telechargement_data.R"
+          
+      - name: Preparation donnees
+        run: |
+          Rscript "03_preparer_data.R"
+      
+      - name: Preparation graphiques
+        run: |
+          Rscript "04_preparer_graphiques.R"
           
       - name: Commit Results 
         run: |
@@ -46,13 +57,12 @@ jobs:
           git add .
           git commit -m "Results from R script $(date)" || echo "No changes to commit"
           git push origin -f || echo "No changes to commit"-
-          
+
       - name: Render rapport
         run: |
-          R -e 'Sys.setlocale("LC_TIME", "fr_FR")'
-          Rscript "02_generer_rapport_html.R"
+          Rscript "05_generer_rapport_html.R"
           
-      - name: Deploy Pages 
+      - name: Commit Page 
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
