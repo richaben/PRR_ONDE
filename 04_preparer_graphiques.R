@@ -40,7 +40,10 @@ if (to_update) {
                   libelle_type_campagne == "usuelle"
                 ) %>% 
                 tidyr::complete(
-                  Annee, Mois,
+                  code_station, 
+                  libelle_station,
+                  Annee, 
+                  Mois,
                   fill = list(
                     libelle_type_campagne = "usuelle",
                     modalite = "Donnée manquante"
