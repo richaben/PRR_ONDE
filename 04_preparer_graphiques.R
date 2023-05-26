@@ -5,7 +5,6 @@
 ##%###############################%##
 
 import::from("dplyr", '%>%')
-library(sf)
 
 source("_config.R")
 
@@ -13,7 +12,8 @@ load("data/onde_data/to_update.rda")
 load("data/processed_data/donnees_pour_graphiques.rda")
 
 if (to_update) {
-
+  library(sf)
+  
   ## Cartes
   ### Préparation données
   
