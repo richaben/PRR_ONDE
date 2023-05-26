@@ -164,7 +164,6 @@ if (to_update) {
       coords = c("longitude", "latitude"), 
       crs = 4326
     ) %>% 
-    sf::st_transform(crs = 2154) %>% 
     dplyr::mutate(label = paste0(libelle_station,' (',code_station,')'))
   
   ## calculs assecs periode ete sur campagnes usuelles
@@ -382,7 +381,7 @@ if (to_update) {
     dplyr::left_join(
       onde_dernieres_campagnes_anciennes_stations %>% 
         dplyr::select(code_station, Couleur, date_campagne, label_point)
-    )
+    ) 
   
   ########################
   # Sauvegarde des objets 
@@ -399,7 +398,8 @@ if (to_update) {
     file = "data/processed_data/donnees_cartes.rda"
   )
   
-  save(stations_onde_geo_usuelles, 
+  save(stations_onde_geo_usuelles,
+       stations_inactives_onde_geo, 
        onde_dernieres_campagnes,
        onde_dernieres_campagnes_usuelles, 
        onde_dernieres_campagnes_comp,

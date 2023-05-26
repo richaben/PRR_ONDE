@@ -181,8 +181,60 @@ if (to_update) {
     }
   )
   
+  ### -> graphiques 3modalités anciennes stations
+  graphiques_int_3mod_old <- 
+    purrr::map(
+      .x = stations_inactives_onde_geo$code_station, 
+      .f = produire_graph_pour_une_station, 
+      type_mod = lib_ecoul3mod,
+      onde_df = onde_anciennes_stations,
+      mod_levels = c("Assec", "Ecoulement\nnon visible", "Ecoulement\nvisible", "Observation\nimpossible", "Donnée\nmanquante"),
+      mod_colors = mes_couleurs_3mod
+    ) %>% 
+    purrr::set_names(stations_inactives_onde_geo$code_station)
+  
+  purrr::walk(
+    names(graphiques_int_3mod_old),
+    function(station) {
+      ggplot2::ggsave(
+        plot = graphiques_int_3mod_old[[station]],
+        filename = paste0("www/png/3mod/", station, ".png"),
+        width = 14,
+        height = 10,
+        units = "cm",
+        dpi = 150
+      )
+    }
+  )
+  
+  ### -> graphiques 4modalités anciennes stations
+  graphiques_int_4mod_old <- 
+    purrr::map(
+      .x = stations_inactives_onde_geo$code_station, 
+      .f = produire_graph_pour_une_station, 
+      type_mod = lib_ecoul4mod,
+      onde_df = onde_anciennes_stations,
+      mod_levels = c("Assec", "Ecoulement\nnon visible", "Ecoulement\nvisible\nfaible", "Ecoulement\nvisible\nacceptable", "Observation\nimpossible", "Donnée\nmanquante"),
+      mod_colors = mes_couleurs_4mod
+    ) %>% 
+    purrr::set_names(stations_inactives_onde_geo$code_station)
+  
+  purrr::walk(
+    names(graphiques_int_4mod_old),
+    function(station) {
+      ggplot2::ggsave(
+        plot = graphiques_int_4mod_old[[station]],
+        filename = paste0("www/png/4mod/", station, ".png"),
+        width = 14,
+        height = 10,
+        units = "cm",
+        dpi = 150
+      )
+    }
+  )
+  
 
-  ## Conditions d"écoulement lors des campagnes usuelles de l'année en cours
+  ## Conditions d'écoulement lors des campagnes usuelles de l'année en cours
 plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
   data_bilan %>% 
     ggplot2::ggplot(
@@ -232,7 +284,7 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
       axis.text.x = ggplot2::element_text(size = 11, colour = 'black'),
       strip.text.x = ggplot2::element_text(size = 11, color = "black", face = "bold"),
       strip.background = ggplot2::element_rect(
-        color="black", fill="grey80", size=1, linetype="solid"
+        color="black", fill="grey80", linewidth = 1, linetype="solid"
       ),
       panel.grid.major = ggplot2::element_line(colour = NA),
       panel.grid.minor = ggplot2::element_line(colour = NA),
@@ -280,7 +332,7 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
           fill = pourcentage_assecs
           )
       ) + 
-      ggplot2::geom_tile(col = 'white', size = 0.5) +
+      ggplot2::geom_tile(col = 'white', linewidth = 0.5) +
       ggplot2::scale_fill_gradientn(
         "% d\'assecs",
         colors = adjustcolor(hcl.colors(10, "RdYlBu", rev = T),
