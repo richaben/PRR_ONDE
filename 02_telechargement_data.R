@@ -30,7 +30,8 @@ if (to_update) {
   param_stations <- 
     hubeau::list_params(api = "ecoulement", endpoint = "stations") %>% 
     toString() %>% 
-    gsub(pattern = " ",replacement = "")
+    gsub(pattern = " ",replacement = "") %>% 
+    paste0(",etat_station")
   
   stations <- purrr::map_df(.x = conf_dep,
                      function(x) hubeau::get_ecoulement_stations(

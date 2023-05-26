@@ -41,10 +41,10 @@ if (to_update) {
       )
   
   
-  # toutes stations toutes annees
+  # toutes stations actives toutes annees
   onde_periode <- onde_df %>% 
     dplyr::select(-c(libelle_reseau, code_type_campagne)) %>% 
-    # filter(etat_station == 'Active') %>% 
+    dplyr::filter(etat_station == 'Active') %>% 
     dplyr::mutate(
       Annee = as.numeric(Annee),
       Mois = format(as.Date(date_campagne), "%m"), 
@@ -67,7 +67,8 @@ if (to_update) {
       lib_ecoul3mod, lib_ecoul4mod,
       libelle_type_campagne,
       longitude, latitude,
-      code_departement
+      code_departement,
+      etat_station
       )
   
   onde_usuel <- onde_periode %>% 
@@ -76,6 +77,35 @@ if (to_update) {
       Mois %in% c("05", "06", "07", "08", "09")
     )
   
+  # toutes stations abandonnees
+  onde_anciennes_stations <- onde_df %>% 
+    dplyr::select(-c(libelle_reseau, code_type_campagne)) %>% 
+    dplyr::filter(etat_station != 'Active') %>% 
+    dplyr::mutate(
+      Annee = as.numeric(Annee),
+      Mois = format(as.Date(date_campagne), "%m"), 
+      Mois_campagne = lubridate::ym(paste0(Annee,Mois,sep="-"))
+    ) %>% 
+    dplyr::mutate(
+      lib_ecoul3mod = dplyr::case_when(
+        libelle_ecoulement == 'Ecoulement visible faible' ~ 'Ecoulement visible',
+        libelle_ecoulement == 'Ecoulement visible acceptable' ~ 'Ecoulement visible',
+        TRUE ~ libelle_ecoulement
+      ),
+      lib_ecoul4mod = dplyr::case_when(
+        libelle_ecoulement == 'Ecoulement visible' ~ 'Ecoulement visible acceptable',
+        TRUE ~ libelle_ecoulement
+      )
+    ) %>% 
+    dplyr::select(
+      code_station, libelle_station,
+      date_campagne, Annee, Mois, Mois_campagne,
+      lib_ecoul3mod, lib_ecoul4mod,
+      libelle_type_campagne,
+      longitude, latitude,
+      code_departement,
+      etat_station
+    )
   
   ## selection sous tableau des dernieres campagnes
   selection_dernieres_campagnes <- function(df) {
@@ -105,8 +135,10 @@ if (to_update) {
     dplyr::filter(libelle_type_campagne != 'usuelle') %>% 
     selection_dernieres_campagnes()
   
+  onde_dernieres_campagnes_anciennes_stations <- onde_anciennes_stations %>% 
+    selection_dernieres_campagnes()
   
-  ## coordonnes stations EPSG 2154 RGF93
+  ## coordonnes stations actives EPSG 2154 RGF93
   stations_onde_geo <- onde_dernieres_campagnes_usuelles %>% 
     dplyr::ungroup() %>% 
     dplyr::select(
@@ -119,6 +151,20 @@ if (to_update) {
       crs = 4326
       ) %>% 
     sf::st_transform(crs = 2154)
+  
+  ## coordonnes stations abandonnees EPSG 2154 RGF93
+  stations_inactives_onde_geo <- onde_dernieres_campagnes_anciennes_stations %>% 
+    dplyr::ungroup() %>% 
+    dplyr::select(
+      code_station ,libelle_station,
+      longitude, latitude,
+      code_departement
+    ) %>% 
+    sf::st_as_sf(
+      coords = c("longitude", "latitude"), 
+      crs = 4326
+    ) %>% 
+    dplyr::mutate(label = paste0(libelle_station,' (',code_station,')'))
   
   ## calculs assecs periode ete sur campagnes usuelles
   assecs <- onde_usuel %>% 
@@ -330,6 +376,12 @@ if (to_update) {
         dplyr::summarise()
     )
   
+  stations_anciennes_onde_geo_map1 <-
+    stations_inactives_onde_geo %>% 
+    dplyr::left_join(
+      onde_dernieres_campagnes_anciennes_stations %>% 
+        dplyr::select(code_station, Couleur, date_campagne, label_point)
+    ) 
   
   ########################
   # Sauvegarde des objets 
@@ -338,6 +390,7 @@ if (to_update) {
     date_derniere_campagne_comp,
     df_categ_obs_4mod,
     stations_onde_geo_map1,
+    stations_anciennes_onde_geo_map1,
     masque_eu,
     depts_sel,
     depts_sel_bbox,
@@ -345,11 +398,14 @@ if (to_update) {
     file = "data/processed_data/donnees_cartes.rda"
   )
   
-  save(stations_onde_geo_usuelles, 
+  save(stations_onde_geo_usuelles,
+       stations_inactives_onde_geo, 
        onde_dernieres_campagnes,
        onde_dernieres_campagnes_usuelles, 
        onde_dernieres_campagnes_comp,
        onde_periode,
+       onde_dernieres_campagnes_anciennes_stations,
+       onde_anciennes_stations,
        df_categ_obs_3mod,
        df_categ_obs_3mod_reg,
        mes_couleurs_3mod,
