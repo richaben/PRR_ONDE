@@ -26,9 +26,6 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: '2.17.1' # Pandoc version pour compiler.
-          
-      - name: Installation dependencies in dev
-        run: Rscript -e 'devtools::install_github("richaben/ondetools")'
         
       - name: Installation dependencies
         run: | 
