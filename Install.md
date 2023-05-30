@@ -166,4 +166,30 @@ En cas d'erreur sur les traitements automatiques, il est possible de relancer ma
 
 ![image](https://github.com/richaben/PRR_ONDE/assets/63242934/eb329fca-918e-400e-93b9-efa0998fb9eb)
 
-    
+## Désinstallation de l'outil
+
+1. Se connecter à GitHub
+2. Afficher la page d'accueil du dépôt régional `PRR_ONDE`
+3. Cliquer sur l'élément `Settings` La page des paramètres généraux du dépôt régional apparaît.
+4. En bas de page, dans la section `Danger Zone`, cliquer sur le bouton `Delete this repository`
+
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/da9f6b40-9452-4990-be2a-e6ad3a7a4d91)
+
+  Une 1êr écran de confirmation apparaît :
+  
+  ![image](https://github.com/richaben/PRR_ONDE/assets/63242934/8343652f-c496-4a62-bc0f-94ab25c70db7)
+  
+5. Cliquer sur le bouton `I want to delete this repository` Une 2nd écran de confirmation apparaît :
+
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/ea42296a-17a3-45ce-a48c-935d90f52f9d)
+
+6. Cliquer sur le bouton `I have read and understand these effects` Un 3ème écran de confirmation apparaît :
+
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/8a624666-1651-4062-b494-d5bfbc7d8601)
+
+7. Renseigner le libellé du dépôt régional comme indiqué et cliquer sur le bouton `Delete this repository` Un dernier écran de confirmation apparaît :
+
+![image](https://github.com/richaben/PRR_ONDE/assets/63242934/f40d4f76-d308-4b66-a7a2-5beda46d332d)
+
+8. Renseigner votre mot de passe GitHub puis cliquer sur le bouton `Confirm` La suppression du dépôt régional est déclenchée. Une fois l'opération réalisée, le dépôt n'apparaît plus dans la liste des dépôts de l'utilisateur GitHub.
+
