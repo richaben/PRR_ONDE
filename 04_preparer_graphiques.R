@@ -50,8 +50,15 @@ if (to_update) {
                     modalite = "Donnée manquante"
                   )
                 ) %>% 
+                dplyr::mutate(
+                  date_campagne = dplyr::if_else(
+                    is.na(date_campagne),
+                    lubridate::as_date(paste0(Annee, "-", as.numeric(Mois), "-25")),
+                    date_campagne
+                  )
+                ) %>% 
                 dplyr::filter(
-                  ! (lubridate::as_date(paste0(Annee, "-", as.numeric(Mois) + 1, "-01")) > Sys.Date())
+                  date_campagne <= Sys.Date()
                 )
             ) %>% 
               dplyr::arrange(
