@@ -9,7 +9,7 @@ import::from("dplyr", '%>%')
 source("_config.R")
 
 load("data/onde_data/to_update.rda")
-# to_update = TRUE
+# to_update <- TRUE
 
 ### Utilisation de l'API Hubeau ----
 

@@ -9,6 +9,7 @@ import::from("dplyr", '%>%')
 source("_config.R")
 
 load("data/onde_data/to_update.rda")
+# to_update <- TRUE
 load("data/raw_data/masks.Rdata")
 
 if (to_update) {
