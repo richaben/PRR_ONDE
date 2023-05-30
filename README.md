@@ -15,3 +15,6 @@ Voir https://github.com/richaben/PRR_ONDE/blob/master/Install.md#enregistrement-
 
 ## Actualisation manuelle du site web 🛠
 Voir https://github.com/richaben/PRR_ONDE/blob/master/Install.md#actualisation-manuelle-du-site-web
+
+## Désinstallation de l'outil
+Voir https://github.com/richaben/PRR_ONDE/blob/master/Install.md#d%C3%A9sinstallation-de-loutil
