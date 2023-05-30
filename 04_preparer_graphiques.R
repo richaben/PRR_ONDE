@@ -9,6 +9,7 @@ import::from("dplyr", '%>%')
 source("_config.R")
 
 load("data/onde_data/to_update.rda")
+# to_update <- TRUE
 load("data/processed_data/donnees_pour_graphiques.rda")
 
 if (to_update) {
