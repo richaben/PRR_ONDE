@@ -14,6 +14,23 @@ load("data/onde_data/to_update.rda")
 ### Utilisation de l'API Hubeau ----
 
 if (to_update) {
+  dernieres_obs <- purrr::map_df(
+    .x = conf_dep,
+    .f = function(d) {
+      data.frame(
+        code_departement = d,
+        date_observation = readLines(
+          paste0(
+            "https://hubeau.eaufrance.fr/api/v1/ecoulement/observations?format=json&code_departement=",
+            d, "&size=1&fields=date_observation&sort=desc"
+          )
+        ) %>%
+          stringr::str_extract(pattern = "\\d{4}-\\d{2}-\\d{2}")
+      )
+
+    }
+  )
+  
   #### infos campagnes
   campagnes <- purrr::map_df(.x = conf_dep,
                       function(x) hubeau::get_ecoulement_campagnes(
@@ -76,6 +93,7 @@ if (to_update) {
   
   ### Ecriture/Sauvegarde des données ----
   write.csv(onde_df, "data/onde_data/onde.csv")
+  write.csv2(dernieres_obs, "data/onde_data/dernieres_obs.csv")
   
 }
 
