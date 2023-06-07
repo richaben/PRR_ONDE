@@ -12,35 +12,33 @@ date_jour_heure <- as.character(format(Sys.time(),"%Y-%m-%d_%Hh%m"))
 source("_config.R")
 
 if (!file.exists("data/onde_data/onde.csv") | 
+    !file.exists("data/onde_data/dernieres_obs.csv") |
     !file.exists("data/processed_data/donnees_pour_graphiques.rda") |
     !file.exists("data/processed_data/graphiques.rda") |
     !file.exists("data/processed_data/donnees_cartes.rda")) {
   to_update <- TRUE
 } else {
-  old_data <- read.csv("data/onde_data/onde.csv", colClasses = "character") %>% 
-      dplyr::mutate(date_campagne = lubridate::as_date(date_campagne, format = "%Y-%m-%d")) %>% 
-      dplyr::group_by(code_departement) %>% 
-      dplyr::filter(date_campagne == max(date_campagne)) %>%
-      dplyr::ungroup() %>% 
-      dplyr::distinct(code_departement, date_campagne) %>% 
-      dplyr::rename(old = date_campagne)
+  old_data <- read.csv2("data/onde_data/dernieres_obs.csv", colClasses = "character") %>% 
+      dplyr::mutate(date_observation = lubridate::as_date(date_observation, format = "%Y-%m-%d")) %>% 
+    dplyr::rename(old = date_observation)
   
   new_data <- purrr::map_df(
     .x = conf_dep,
-    function(dep) {
-      hubeau::get_ecoulement_campagnes(
-        code_departement = dep,
-        fields = "code_departement,date_campagne"
+    .f = function(d) {
+      data.frame(
+        code_departement = d,
+        date_observation = readLines(
+          paste0(
+            "https://hubeau.eaufrance.fr/api/v1/ecoulement/observations?format=json&code_departement=",
+            d, "&size=1&fields=date_observation&sort=desc"
+          )
+        ) %>%
+          stringr::str_extract(pattern = "\\d{4}-\\d{2}-\\d{2}")
       )
+      
     }
   ) %>% 
-    dplyr::mutate(
-      date_campagne = lubridate::as_date(date_campagne, format = "%Y-%m-%d")
-    ) %>% 
-    dplyr::group_by(code_departement) %>% 
-    dplyr::filter(date_campagne == max(date_campagne)) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::rename(new = date_campagne)
+    dplyr::rename(new = date_observation)
   
   if (
     any(! old_data$code_departement %in% new_data$code_departement) |
@@ -53,15 +51,11 @@ if (!file.exists("data/onde_data/onde.csv") |
         y = new_data,
         by = "code_departement"
         ) %>% 
-        dplyr::mutate(update = new > old) %>% 
-        dplyr::pull(update) %>% 
-        (function(x) {
-          if (any(x)) {
-            TRUE
-            } else {
-              FALSE
-              }
-          })
+        dplyr::select(old, new) %>% 
+        t() %>% 
+        duplicated() %>% 
+        any() %>% 
+        '!'()
   }
 }
 
