@@ -174,10 +174,10 @@ Les **observations impossibles** et **données manquantes** sont également repr
     layer.name = "Suivi Onde",
     legend = FALSE,
     alpha.regions = 0.9,
-    zcol = "label_point",
+    zcol = "label_point_3mod",
     popup = leafpop::popupImage(popups_3mod[stations_onde_geo_map1$code_station],
                                 height = 290, width = 400),
-    col.regions = stations_onde_geo_map1$Couleur,
+    col.regions = stations_onde_geo_map1$Couleur_3mod,
     homebutton = T
   ) +
   if (nrow(stations_anciennes_onde_geo_map1) > 0) {
@@ -186,7 +186,7 @@ Les **observations impossibles** et **données manquantes** sont également repr
       layer.name = "Anciennes stations",
       legend = FALSE,
       alpha.regions = 0.1,
-      zcol = "label_point",
+      zcol = "label_point_3mod",
       hide = T,
       popup = leafpop::popupImage(popups_3mod[stations_anciennes_onde_geo_map1$code_station],
                                   height = 290, width = 400),
@@ -210,10 +210,10 @@ Les **observations impossibles** et **données manquantes** sont également repr
     layer.name = "Suivi Onde",
     legend = FALSE,
     alpha.regions = 0.9,
-    zcol = "label_point",
+    zcol = "label_point_4mod",
     popup = leafpop::popupImage(popups_4mod[stations_onde_geo_map1$code_station],
                                 height = 290, width = 400),
-    col.regions = stations_onde_geo_map1$Couleur,
+    col.regions = stations_onde_geo_map1$Couleur_4mod,
     homebutton = T
   ) +
   if (nrow(stations_anciennes_onde_geo_map1) > 0) {
@@ -222,7 +222,7 @@ Les **observations impossibles** et **données manquantes** sont également repr
       layer.name = "Anciennes stations",
       legend = FALSE,
       alpha.regions = 0.1,
-      zcol = "label_point",
+      zcol = "label_point_4mod",
       hide = T,
       popup = leafpop::popupImage(popups_4mod[stations_anciennes_onde_geo_map1$code_station],
                                   height = 290, width = 400),
