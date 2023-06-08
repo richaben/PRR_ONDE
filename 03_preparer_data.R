@@ -116,11 +116,14 @@ if (to_update) {
       dplyr::arrange(libelle_type_campagne, libelle_station, Mois_campagne) %>% 
       dplyr::ungroup() %>% 
       dplyr::mutate(
-        Couleur = dplyr::recode(
-          stringr::str_wrap(lib_ecoul3mod,12), !!!mes_couleurs_3mod)
+        Couleur_3mod = dplyr::recode(
+          stringr::str_wrap(lib_ecoul3mod,12), !!!mes_couleurs_3mod),
+        Couleur_4mod = dplyr::recode(
+          stringr::str_wrap(lib_ecoul4mod,12), !!!mes_couleurs_4mod)
         ) %>% 
       dplyr::mutate(
-        label_point = glue::glue('{libelle_station}: {lib_ecoul3mod} ({date_campagne})')
+        label_point_3mod = glue::glue('{libelle_station}: {lib_ecoul3mod} ({date_campagne})'),
+        label_point_4mod = glue::glue('{libelle_station}: {lib_ecoul4mod} ({date_campagne})')
         )
   }
   
@@ -362,7 +365,7 @@ if (to_update) {
     stations_onde_geo_usuelles %>% 
     dplyr::left_join(
       onde_dernieres_campagnes %>% 
-        dplyr::select(code_station, Couleur, date_campagne, label_point)
+        dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod )
     )
   
   depts_sel <- depts %>%
@@ -381,7 +384,7 @@ if (to_update) {
     stations_inactives_onde_geo %>% 
     dplyr::left_join(
       onde_dernieres_campagnes_anciennes_stations %>% 
-        dplyr::select(code_station, Couleur, date_campagne, label_point)
+        dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod)
     ) 
   
   ########################
