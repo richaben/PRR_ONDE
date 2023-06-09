@@ -32,9 +32,24 @@ Afin de faciliter le travail d'intégration de ces contributions, un certain nom
 
 Le travail de développement ne se fait pas directement sur le dépôt de référence mais sur des copies ([fork](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)) de ce dépôt par les contributeurs, ce qui leur permet de tester les modifications et ajouts proposées sans risque d'impacter le dépôt de référence.
 
-Les propositions de modifications sont ensuite proposées ([Pull request](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)) au dépôt de référence dont les contributeurs évalueront la pertinence et la faisabilité de leur intégration.
+Les propositions de modifications sont ensuite proposées ([Pull request](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)) au dépôt de référence dont les contributeurs principaux évalueront la pertinence et la faisabilité de leur intégration.
 
 ### Branches
+
+Un dépôt peut contenir plusieurs lignes de développement en parallèle, ce que l'on appelle des [branches](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches). Les modifications apportées dans une branche n'affectent pas le code des autres branches.
+
+#### Le dépôt de référence
+
+Le dépôt de référence du PRR Onde est composé de trois branches:
+
+-   **`master`**: c'est la branche principale, celle qui retrace l'historique des modifications du code de l'application. Il est souhaité que l'historique de cette branche soit le plus propre possible afin de faciliter sa lecture et de **visualiser rapidement les principales étapes et évolutions du code**. **Cette branche ne doit pas être modifiée directement**;
+
+-   **`deploy`**: il s'agit d'une copie de la branche principale qui récupère automatiquement les modifications apportées à cette dernière. C'est également sur cette branche que sont effectuées automatiquement les mise-à-jour des données et le déploiement de la page HTML générée. **Cette branche ne doit pas être modifiée manuellement**;
+
+-   **`dev`**: il s'agit de la branche de travail sur laquelle vont **être enregistrées toutes les modifications du code**. Afin de faciliter le travail collaboratif, **l'idéal est de ne pas travailler directement sur cette branche mais d'y intégrer les propositions de modification des collaborateurs en utilisant des Pull requests**. Une fois un certain nombre de modifications intégrées et testées dans dev, il convient alors de les intégrer dans la branche principale.
+
+-   **dev**: il s'agit de la branche de travail sur laquelle vont **être enregistrées toutes les modifications du code**. Afin de faciliter le travail collaboratif, **l'idéal est de ne pas travailler directement sur cette branche mais d'y intégrer les propositions de modification des collaborateurs en utilisant des Pull requests**. Une fois un certain nombre de modifications intégrées et testées dans dev, il convient alors de les intégrer dans la branche principale.
+
 
 #### Règles de nommage
 
