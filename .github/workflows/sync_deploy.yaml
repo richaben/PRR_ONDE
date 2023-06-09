@@ -54,7 +54,7 @@ jobs:
         
       - name: Verifier maj
         run: |
-          Rscript "01_verifier_maj.R"
+          Rscript "01_forcer_maj.R"
           
       - name: Telechargement donnees
         run: |
