@@ -24,7 +24,15 @@ Les contributeurs au dépôt de référence peuvent attribuer des étiquettes *(
 
 ## Contribution au code
 
-### Copie distante et locale
+Il est également possible de contribuer à l'amélioration de l'outil plus directement via des modifications du code et de la documentation.
+
+Afin de faciliter le travail d'intégration de ces contributions, un certain nombre de recommendations sont nécessaires.
+
+### Principe
+
+Le travail de développement ne se fait pas directement sur le dépôt de référence mais sur des copies ([fork](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)) de ce dépôt par les contributeurs, ce qui leur permet de tester les modifications et ajouts proposées sans risque d'impacter le dépôt de référence.
+
+Les propositions de modifications sont ensuite proposées ([Pull request](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)) au dépôt de référence dont les contributeurs évalueront la pertinence et la faisabilité de leur intégration.
 
 ### Branches
 
