@@ -66,4 +66,12 @@ Afin de faciliter le suivi des propositions de modification, il est nécessaire 
 
 Le nom de la branche précise alors, de manière synthétique, la modification apportée.
 
+#### Proposition d'intégration des modifications dans le dépôt de référence
+
+Les modifications ainsi réalisées sur le dépôt d'un contributeur sont proposées pour intégration dans la branche `dev` du dépôt de référence via le mécanisme de *Pull request*. Le nom et la description de la proposition doivent être suffisamment explicite pour que les contributeurs principaux puissent savoir de quoi il retourne sans avoir à regarder en détail les modifications apportées au code et aux fichiers du dépôt. Une fois la proposition intégrée à la branche `dev` du dépôt de référence, la branche d'origine sur le dépôt du contributeur peut être supprimée s'il le souhaite. La branche `dev` des dépôts dupliqués doit alors être mise à jour en la synchronisant avec celle du dépôt de référence.
+
+Une fois les modifications testées sur la branche `dev` et éventuellement complétées par d'autres modifications, elles sont intégrées dans la branche principale du dépôt de référence et sont ainsi prêtes à être déployées sur les dépôts des différentes déclinaisons régionales de l'outil.
+
+Lorsque la modification concerne des corrections de bugs impactant le fonctionnement de l'appli ou la fiabilité des données, la procédure d'intégration peut être accélérer et les modificaitons directement intégrées dans la branche principale. La branche `dev` devra alors être également mise à jour depuis la branche principale pour intégrer ces correctifs.
+
 #### Principes d'intégration
