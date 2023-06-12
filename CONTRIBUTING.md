@@ -74,4 +74,9 @@ Une fois les modifications testées sur la branche `dev` et éventuellement comp
 
 Lorsque la modification concerne des corrections de bugs impactant le fonctionnement de l'appli ou la fiabilité des données, la procédure d'intégration peut être accélérer et les modificaitons directement intégrées dans la branche principale. La branche `dev` devra alors être également mise à jour depuis la branche principale pour intégrer ces correctifs.
 
+### Suivi des modifications 
+
+Chaque proposition de modification portée sur une branche de développement peut être assez complexe et impliquer de nombreuses lignes de codes réparties dans plusieurs fichiers. Pour faciliter sa compréhension, il convient que les modifications ne soient pas toutes concentrées dans un seul enregistrement ([commit](https://docs.github.com/fr/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/about-commits)) mais détaillées dans plusieurs enregistrements ne concernant qu'une part plus réduite et cohérente du code. Le nom des commits et leur description doivent permettre de comprendre quel changement a été fait et dans quelle finalité.
+
+
 #### Principes d'intégration
