@@ -48,9 +48,22 @@ Le dépôt de référence du PRR Onde est composé de trois branches:
 
 -   **`dev`**: il s'agit de la branche de travail sur laquelle vont **être enregistrées toutes les modifications du code**. Afin de faciliter le travail collaboratif, **l'idéal est de ne pas travailler directement sur cette branche mais d'y intégrer les propositions de modification des collaborateurs en utilisant des Pull requests**. Une fois un certain nombre de modifications intégrées et testées dans dev, il convient alors de les intégrer dans la branche principale.
 
--   **dev**: il s'agit de la branche de travail sur laquelle vont **être enregistrées toutes les modifications du code**. Afin de faciliter le travail collaboratif, **l'idéal est de ne pas travailler directement sur cette branche mais d'y intégrer les propositions de modification des collaborateurs en utilisant des Pull requests**. Une fois un certain nombre de modifications intégrées et testées dans dev, il convient alors de les intégrer dans la branche principale.
+#### Les dépôts dupliqués des contributeurs
 
+En plus des trois branches mentionnées pour le dépôt de référence, les dépôts des contributeurs, sur lesquels sont fait les travaux de développement, vont contenir des branches supplémentaires. Ces branches vont servir à enregistrer les modifications du code proposées pour intégration dans le dépôt de référence. Chaque branche est créée à partir de la branche `dev` et **correspond à une proposition de modification spécifique** (ajout d'une fonctionnalité, correction d'un bug, ajout/modification de documentation...).
 
 #### Règles de nommage
+
+Afin de faciliter le suivi des propositions de modification, il est nécessaire que les branches soient nommées de manière explicite. On peut classer les branches avec des dossiers en les nommant de la manière suivante: `dossier/branche`. Le nom de dossier peut reprendre la typologie suivante:
+
+-   `fonc`: ajout, suppression ou modification d'une fonctionnalité;
+
+-   `fix`: correction de bug;
+
+-   `doc`: ajout, modification de la documentation;
+
+-   `code`: modification du code sans alteration des fonctionnalités (refactorisation): pour amélioration de performance, de lisibilité...
+
+Le nom de la branche précise alors, de manière synthétique, la modification apportée.
 
 #### Principes d'intégration
