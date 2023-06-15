@@ -84,5 +84,24 @@ Pour faciliter sa compréhension, il convient que les modifications ne soient pa
 
 Le nom des commits et leur description doivent permettre de comprendre quel changement a été fait et dans quelle finalité.
 
+## ⚠️ Précautions
 
-#### Principes d'intégration
+Lors de la déclinaison régionale et ensuite lors des mises-à-jours automatiques certains fichiers sont modifiés manuellement ou automatiquement sur les branches `master` et `deploy` des dépôts dupliqués.
+
+**La modification de ces fichiers sur le dépôt de référence entrainera donc l'échec de la fusion automatique des mises-à-jours des déclinaisons régionalisées depuis le dépôt de référence.**
+
+**Ces fichiers ne doivent donc être modifiés sur la branche principale du dépôt de référence que si cela est nécessaire pour ajouter une nouvelle fonctionnalité ou résoudre un problème.**
+
+Lorsque ces fichiers sont modifiés et que la mise-à-jour automatique échoue, il convient soit de [**résoudre manuellement les conflits**](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-on-github), soit de [**supprimer le dépôt dupliqué**](https://github.com/richaben/PRR_ONDE/blob/master/Install.md#d%C3%A9sinstallation-de-loutil) **et de [refaire une copie](https://github.com/richaben/PRR_ONDE/blob/master/Install.md#installation-de-loutil) à partir de la dernière version du dépôt de référence**.
+
+Les fichiers concernés sont:
+
+-   `_config.R`
+
+-   `index.html`
+
+-   `data/onde_data`
+
+-   `data/processed_data`
+
+#### 
