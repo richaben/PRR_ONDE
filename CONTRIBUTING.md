@@ -10,9 +10,9 @@ Ce document décrit les grands principes permettant de structurer les contributi
 
 Les signalements de bug, demandes de corrections ou d'évolutions doivent être remontés via [l'outil Issues du dépôt de référence](https://github.com/richaben/PRR_ONDE/issues),.
 
-Afin de faciliter le traitement de ces demandes, il est recommandé d'être **le plus précis possible** dans la description des problèmes rencontrés ou des évolutions demandées. Des captures d'écran peuvent être utilement mises à contribution.
+Afin de faciliter le traitement de ces demandes, il est recommandé d'être **le plus précis possible** dans la description des problèmes rencontrés ou des évolutions demandées. Des captures d'écran peuvent être utilement mises à contribution. Il est fortement recommandé d'utiliser les modèles de formulaire fournis pour les trois principaux types de demandes (signalement de problèmes, demande d'évolution, demande de documentation).
 
-Il est également recomandé de **lire les tickets déjà ouverts afin de vérifier que le problème rencontré n'a pas déjà été signalé**. Si le problème est le même, il est préférable de compléter sa description, de signaler qu'il est observé par d'autres dans le ticket d'origine plutôt que d'en ouvrir un nouveau.
+Il est également recommandé de **lire les tickets déjà ouverts afin de vérifier que le problème rencontré n'a pas déjà été signalé**. Si le problème est le même, il est préférable de compléter sa description, de signaler qu'il est observé par d'autres dans le ticket d'origine plutôt que d'en ouvrir un nouveau.
 
 Les contributeurs au dépôt de référence peuvent attribuer des étiquettes *(labels)* aux tickets ouverts afin de les classer dans plusieurs catégories, dont :
 
@@ -21,6 +21,8 @@ Les contributeurs au dépôt de référence peuvent attribuer des étiquettes *(
 -   **enhancement**: proposition d'amélioration de l'application (ergonomie, fonctionnalité...)
 
 -   **documentation**: besoin d'ajout ou de précision dans la documentation
+
+Les tickets ouverts à l'aide des modèles de formulaires se voient automatiquement attribuer le label correspondant au type de formulaire.
 
 ## Contribution au code
 
@@ -74,7 +76,7 @@ Une fois les modifications testées sur la branche `dev` et éventuellement comp
 
 Lorsque la modification concerne des corrections de bugs impactant le fonctionnement de l'appli ou la fiabilité des données, la procédure d'intégration peut être accélérer et les modificaitons directement intégrées dans la branche principale. La branche `dev` devra alors être également mise à jour depuis la branche principale pour intégrer ces correctifs.
 
-### Suivi des modifications 
+### Suivi des modifications
 
 Chaque proposition de modification portée sur une branche de développement peut être assez complexe et impliquer de nombreuses lignes de codes réparties dans plusieurs fichiers. Pour faciliter sa compréhension, il convient que les modifications ne soient pas toutes concentrées dans un seul enregistrement ([commit](https://docs.github.com/fr/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/about-commits)) mais détaillées dans plusieurs enregistrements ne concernant qu'une part plus réduite et cohérente du code. Le nom des commits et leur description doivent permettre de comprendre quel changement a été fait et dans quelle finalité.
 
