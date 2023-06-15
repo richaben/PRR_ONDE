@@ -2,15 +2,15 @@
 
 ## Dépôt de référence
 
-Le dépôt de référence du projet est hébergé sur Github: <https://github.com/richaben/PRR_ONDE>. Les mises-à-jour du code de l'application doivent d'abord être intégrées dans la branche principale de dépôt pour être accessibles aux différentes déclinaisons régionales de l'outil (voir [ici pour la procédure d'installation](https://github.com/richaben/PRR_ONDE/blob/master/Install.md#installation-de-loutil)).
+Le dépôt de référence du projet est hébergé sur Github: <https://github.com/richaben/PRR_ONDE>. Les mises-à-jour du code de l'application doivent d'abord être intégrées dans la branche principale de dépôt pour être accessibles aux différentes déclinaisons régionales de l'outil (voir [la procédure d'installation](https://github.com/richaben/PRR_ONDE/blob/master/Install.md#installation-de-loutil)).
 
-Ce document décrit les grands principes permettant de structurer les contributions à l'outil via ce dépôt référence. Ces contributions nécessitent de disposer d'un compte GitHub.
+Ce document décrit les grands principes permettant de structurer les contributions à l'outil via ce dépôt de référence. Ces contributions nécessitent de disposer d'un compte GitHub.
 
 ## Tickets
 
-Les signalements de bug, demandes de corrections ou d'évolutions doivent être remontés via [l'outil Issues du dépôt de référence](https://github.com/richaben/PRR_ONDE/issues),.
+Les signalements de bug, demandes de corrections ou d'évolutions doivent être remontés via [l'outil `Issues` du dépôt de référence](https://github.com/richaben/PRR_ONDE/issues),.
 
-Afin de faciliter le traitement de ces demandes, il est recommandé d'être **le plus précis possible** dans la description des problèmes rencontrés ou des évolutions demandées. Des captures d'écran peuvent être utilement mises à contribution. Il est fortement recommandé d'utiliser les modèles de formulaire fournis pour les trois principaux types de demandes (signalement de problèmes, demande d'évolution, demande de documentation).
+Afin de faciliter le traitement de ces demandes, il est recommandé d'être **le plus précis possible** dans la description des problèmes rencontrés ou des évolutions demandées. Des captures d'écran peuvent être utilement mises à contribution. Il est **fortement recommandé d'utiliser les modèles de formulaire fournis** pour les trois principaux types de demandes (signalement de problèmes, demande d'évolution, demande de documentation).
 
 Il est également recommandé de **lire les tickets déjà ouverts afin de vérifier que le problème rencontré n'a pas déjà été signalé**. Si le problème est le même, il est préférable de compléter sa description, de signaler qu'il est observé par d'autres dans le ticket d'origine plutôt que d'en ouvrir un nouveau.
 
@@ -22,7 +22,7 @@ Les contributeurs au dépôt de référence peuvent attribuer des étiquettes *(
 
 -   **documentation**: besoin d'ajout ou de précision dans la documentation
 
-Les tickets ouverts à l'aide des modèles de formulaires se voient automatiquement attribuer le label correspondant au type de formulaire.
+Les tickets ouverts à l'aide des modèles de formulaires se voient automatiquement attribuer l'étiquette correspondant au type de formulaire.
 
 ## Contribution au code
 
@@ -34,7 +34,7 @@ Afin de faciliter le travail d'intégration de ces contributions, un certain nom
 
 Le travail de développement ne se fait pas directement sur le dépôt de référence mais sur des copies ([fork](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)) de ce dépôt par les contributeurs, ce qui leur permet de tester les modifications et ajouts proposées sans risque d'impacter le dépôt de référence.
 
-Les propositions de modifications sont ensuite proposées ([Pull request](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)) au dépôt de référence dont les contributeurs principaux évalueront la pertinence et la faisabilité de leur intégration.
+Les propositions de modifications sont ensuite proposées ([Pull request](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)) au dépôt de référence dont les contributeurs principaux évalueront la pertinence et la faisabilité de l'intégration.
 
 ### Branches
 
@@ -48,7 +48,7 @@ Le dépôt de référence du PRR Onde est composé de trois branches:
 
 -   **`deploy`**: il s'agit d'une copie de la branche principale qui récupère automatiquement les modifications apportées à cette dernière. C'est également sur cette branche que sont effectuées automatiquement les mise-à-jour des données et le déploiement de la page HTML générée. **Cette branche ne doit pas être modifiée manuellement**;
 
--   **`dev`**: il s'agit de la branche de travail sur laquelle vont **être enregistrées toutes les modifications du code**. Afin de faciliter le travail collaboratif, **l'idéal est de ne pas travailler directement sur cette branche mais d'y intégrer les propositions de modification des collaborateurs en utilisant des Pull requests**. Une fois un certain nombre de modifications intégrées et testées dans dev, il convient alors de les intégrer dans la branche principale.
+-   **`dev`**: il s'agit de la branche de travail sur laquelle vont **être enregistrées toutes les modifications du code**. Afin de faciliter le travail collaboratif, **l'idéal est de ne pas travailler directement sur cette branche mais d'y intégrer les propositions de modification des collaborateurs en utilisant des Pull requests**. Une fois un certain nombre de modifications intégrées et testées dans la branche `dev`, il convient alors de les intégrer dans la branche principale.
 
 #### Les dépôts dupliqués des contributeurs
 
@@ -74,8 +74,6 @@ Les modifications ainsi réalisées sur le dépôt d'un contributeur sont propos
 
 Une fois les modifications testées sur la branche `dev` et éventuellement complétées par d'autres modifications, elles sont intégrées dans la branche principale du dépôt de référence et sont ainsi prêtes à être déployées sur les dépôts des différentes déclinaisons régionales de l'outil.
 
-Lorsque la modification concerne des corrections de bugs impactant le fonctionnement de l'appli ou la fiabilité des données, la procédure d'intégration peut être accélérer et les modificaitons directement intégrées dans la branche principale. La branche `dev` devra alors être également mise à jour depuis la branche principale pour intégrer ces correctifs.
-
 ### Suivi des modifications
 
 Chaque proposition de modification portée sur une branche de développement peut être assez complexe et impliquer de nombreuses lignes de codes réparties dans plusieurs fichiers.
@@ -88,7 +86,7 @@ Le nom des commits et leur description doivent permettre de comprendre quel chan
 
 Lors de la déclinaison régionale et ensuite lors des mises-à-jours automatiques certains fichiers sont modifiés manuellement ou automatiquement sur les branches `master` et `deploy` des dépôts dupliqués.
 
-**La modification de ces fichiers sur le dépôt de référence entrainera donc l'échec de la fusion automatique des mises-à-jours des déclinaisons régionalisées depuis le dépôt de référence.**
+**La modification de ces fichiers sur le dépôt de référence entrainera donc l'échec des mises-à-jours automatiques des déclinaisons régionalisées depuis le dépôt de référence.**
 
 **Ces fichiers ne doivent donc être modifiés sur la branche principale du dépôt de référence que si cela est nécessaire pour ajouter une nouvelle fonctionnalité ou résoudre un problème.**
 
