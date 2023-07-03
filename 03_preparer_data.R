@@ -434,6 +434,52 @@ if (to_update) {
         dplyr::summarise()
     )
   
+  icones_3mod <- stations_onde_geo_map1  %>% 
+    dplyr::rowwise() %>% 
+    dplyr::group_split() %>% 
+    purrr::map(
+      function(df_i) {
+        leaflet::makeIcon(
+          iconUrl = df_i$icone_3mod,
+          iconWidth = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
+          iconHeight = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
+        )
+      }
+    ) %>% 
+    purrr::set_names(stations_onde_geo_map1$id) %>% 
+    (function(l) {
+      # code adapté de leaflet::iconList
+      res <- structure(l, class = "leaflet_icon_set")
+      cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+      if (any(!cls))
+        stop("Arguments passed must be icon objects retruned from makeIcon()")
+      res
+    })
+  
+  icones_4mod <- stations_onde_geo_map1  %>% 
+    dplyr::rowwise() %>% 
+    dplyr::group_split() %>% 
+    purrr::map(
+      function(df_i) {
+        leaflet::makeIcon(
+          iconUrl = df_i$icone_4mod,
+          iconWidth = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
+          iconHeight = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
+        )
+      }
+    ) %>% 
+    purrr::set_names(stations_onde_geo_map1$id) %>% 
+    (function(l) {
+      # code adapté de leaflet::iconList
+      res <- structure(l, class = "leaflet_icon_set")
+      cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+      if (any(!cls))
+        stop("Arguments passed must be icon objects retruned from makeIcon()")
+      res
+    })
+  
+  
+  
   stations_anciennes_onde_geo_map1 <-
     stations_inactives_onde_geo %>% 
     dplyr::left_join(
@@ -448,6 +494,7 @@ if (to_update) {
     date_derniere_campagne_comp,
     df_categ_obs_4mod,
     stations_onde_geo_map1,
+    icones_3mod, icones_4mod,
     stations_anciennes_onde_geo_map1,
     masque_eu,
     depts_sel,
