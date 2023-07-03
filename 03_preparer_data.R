@@ -362,11 +362,65 @@ if (to_update) {
   
   # Données cartes
   stations_onde_geo_map1 <-
-    stations_onde_geo_usuelles %>% 
-    dplyr::left_join(
-      onde_dernieres_campagnes %>% 
-        dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod )
-    )
+    # stations_onde_geo_usuelles %>% 
+    # dplyr::left_join(
+    #   onde_dernieres_campagnes %>% 
+    #     dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod )
+    # )
+  onde_periode %>% 
+    dplyr::group_by(code_station) %>% 
+    dplyr::mutate(pourcentage_assecs = length(lib_ecoul3mod[lib_ecoul3mod=='Assec' & libelle_type_campagne == "usuelle"]) / length(lib_ecoul3mod[libelle_type_campagne == "usuelle"])) %>% 
+    dplyr::group_by(code_station, libelle_type_campagne) %>% 
+    dplyr::filter(date_campagne == max(date_campagne)) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(id = seq(dplyr::n()))%>%
+    # dplyr::slice(seq(2)) %>% 
+    dplyr::mutate(
+      icone_3mod = dplyr::case_when(
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Assec" ~
+          "../www/icons/usuelle_assec.png",
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Ecoulement non visible" ~ 
+          "../www/icons/usuelle_ecoulement_non_visible.png",
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Ecoulement visible" ~
+          "../www/icons/usuelle_ecoulement_visible.png",
+        libelle_type_campagne == "usuelle" & 
+          lib_ecoul3mod == "Observation impossible" ~ 
+          "../www/icons/usuelle_observation_impossible.png",
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Donnée manquante" ~ 
+          "../www/icons/usuelle_donnee_manquante.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Assec" ~ 
+          "../www/icons/complementaire_assec.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Ecoulement non visible" ~
+          "../www/icons/complementaire_ecoulement_non_visible.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Ecoulement visible" ~ 
+          "../www/icons/complementaire_ecoulement_visible.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Observation impossible" ~
+          "../www/icons/complementaire_observation_impossible.png",
+        libelle_type_campagne == "complémentaire" & 
+          lib_ecoul3mod == "Donnée manquante" ~ 
+          "../www/icons/complementaire_donnee_manquante.png"
+      )
+    ) %>% 
+    dplyr::mutate(
+      icone_4mod = dplyr::if_else(
+        lib_ecoul4mod == "Ecoulement visible faible",
+        stringr::str_replace_all(
+          string = icone_3mod, 
+          pattern = "ecoulement_visible", 
+          replacement = "ecoulement_faible"
+        ),
+        icone_3mod
+      )
+    ) %>% 
+    sf::st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
   
   depts_sel <- depts %>%
     dplyr::filter(code_insee %in% conf_dep) %>% 
