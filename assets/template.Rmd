@@ -52,9 +52,11 @@ load("../data/processed_data/donnees_cartes.rda")
 
 Les cartes se lisent de la manière suivante :
 
--   La couleur des points correspond à la situation des dernières observations (usuelles ou complémentaires) sur les stations. **Les données affichées peuvent donc ne pas être comparables si les suivis n'ont pas été réalisés à la même période** ;
--   Les tailles des points sont proportionnelles à la fréquence des assecs sur les chroniques de données des campagnes usuelles ;
--   En cliquant sur une station, un graphique de l'historique des observations et états d'écoulement peut être affiché ;.
+-   La forme des symboles correspond au type de campagne: carré pour les campagnes usuelles, rond pour les campagnes complémentaires ;
+-   La dernière campagne usuelle est représentée et seules les observations complémentaires postérieures à cette campagne sont représentées ;
+-   La couleur des symbole correspond à la situation des observations au cours de ces dernières campagnes ;
+-   La taille des symbole est proportionnelle à la fréquence des assecs sur les chroniques de données des campagnes usuelles ;
+-   En cliquant sur une station, un graphique de l'historique des observations et états d'écoulement peut être affiché. Ce graphique reprend la même symbologie que la carte ;
 -   Avec le menu déroulant (en haut à droite), différents éléments cartographiques peuvent être affichés (i.e. fonds de cartes, départements, assecs, zones d'alerte Propluvia).
 
 Deux onglets pour les deux typologies d'observations sont distingués:
@@ -264,7 +266,7 @@ map_4mod <- map_situation
 
 #### Typologie nationale
 
-```{r bilan observation, fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
+```{r bilan observation, fig.height = 5.5, fig.width = 9, align = "center", warning = FALSE}
 bilan_cond_reg_typo_nat
 ```
 
