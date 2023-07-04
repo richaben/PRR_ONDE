@@ -250,7 +250,7 @@ bilan_cond_reg_typo_nat
 
 #### Typologie départementale
 
-```{r fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
+```{r fig.height = 5.5, fig.width = 9, align = "center", warning = FALSE}
 bilan_cond_reg_typo_dep
 ```
 
@@ -272,7 +272,7 @@ assecs_consecutifs_reg
 
 ## Bilans départementaux {.tabset}
 
-```{r, results='asis'}
+```{r, results='asis', fig.height=5.5, fig.width=9, align='center'}
 for (d in conf_dep) {
   if (d %in% df_categ_obs_4mod$code_departement) {
     cat(paste0("\n### ", d, "\n"))
