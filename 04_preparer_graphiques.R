@@ -243,8 +243,9 @@ if (to_update) {
   
 
   ## Conditions d'écoulement lors des campagnes usuelles de l'année en cours
-plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
+plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE, modalites = ggplot2::waiver()) {
   data_bilan %>% 
+    
     ggplot2::ggplot(
       mapping = ggplot2::aes(
         y = frq, 
@@ -284,6 +285,8 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
                  "Ecoulement visible acceptable" = "#4575b4",
                  "Ecoulement visible" = "#4575b4"
                  ),
+      breaks = modalites,
+      drop = FALSE
     ) +
     ggplot2::theme_bw() +
     ggplot2::theme(
@@ -302,20 +305,24 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
       plot.background = ggplot2::element_blank(),
     ) +
     ggplot2::guides(
-      fill = ggplot2::guide_legend(nrow = 2, byrow = TRUE)
+      fill = ggplot2::guide_legend(nrow = 2, byrow = FALSE)
       )
 }
 
   bilan_cond_reg_typo_nat <- plot_bilan_prop(
-    df_categ_obs_3mod_reg,
+    df_categ_obs_3mod_reg %>% 
+      dplyr::mutate(lib_ecoul3mod = forcats::fct_rev(lib_ecoul3mod)),
     lib_ecoulement = lib_ecoul3mod, 
-    regional = TRUE
+    regional = TRUE,
+    modalites = c("Donnée manquante", "Observation impossible", "Assec", "Ecoulement non visible", "Ecoulement visible")
     )
   
   bilan_cond_reg_typo_dep <- plot_bilan_prop(
-    df_categ_obs_4mod_reg, 
+    df_categ_obs_4mod_reg %>% 
+      dplyr::mutate(lib_ecoul4mod = forcats::fct_rev(lib_ecoul4mod)), 
     lib_ecoulement = lib_ecoul4mod, 
-    regional = TRUE
+    regional = TRUE,
+    modalites = c("Donnée manquante", "Observation impossible", "Assec", "Ecoulement non visible", "Ecoulement visible faible", "Ecoulement visible acceptable")
   )
   
   bilan_cond_dep <- conf_dep %>% 
@@ -324,8 +331,10 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
         if (d %in% df_categ_obs_4mod$code_departement) {
           plot_bilan_prop(
             df_categ_obs_4mod %>% 
-              dplyr::filter(code_departement == d), 
-            lib_ecoulement = lib_ecoul4mod
+              dplyr::filter(code_departement == d) %>% 
+              dplyr::mutate(lib_ecoul4mod = forcats::fct_rev(lib_ecoul4mod)), 
+            lib_ecoulement = lib_ecoul4mod,
+            modalites = c("Donnée manquante", "Observation impossible", "Assec", "Ecoulement non visible", "Ecoulement visible faible", "Ecoulement visible acceptable")
           )
         }
       }
