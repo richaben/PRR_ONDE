@@ -253,9 +253,10 @@ if (to_update) {
     prep_data_bilan(
       mod = lib_ecoul3mod,
       mod_levels = c("Ecoulement visible",
-                   #"Ecoulement visible faible",
-                   "Ecoulement non visible",
-                   "Assec"),
+                     "Ecoulement non visible",
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante"),
       code_departement
     )
 
@@ -263,9 +264,10 @@ if (to_update) {
     prep_data_bilan(
       mod = lib_ecoul3mod,
       mod_levels = c("Ecoulement visible",
-                     #"Ecoulement visible faible",
                      "Ecoulement non visible",
-                     "Assec")
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante")
     )
   
   df_categ_obs_4mod <- onde_usuel %>% 
@@ -274,7 +276,9 @@ if (to_update) {
       mod_levels = c("Ecoulement visible acceptable",
                      "Ecoulement visible faible",
                      "Ecoulement non visible",
-                     "Assec"),
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante"),
       code_departement
     )
 
@@ -284,7 +288,9 @@ if (to_update) {
       mod_levels = c("Ecoulement visible acceptable",
                      "Ecoulement visible faible",
                      "Ecoulement non visible",
-                     "Assec")
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante")
     )
   
   ## Heatmap

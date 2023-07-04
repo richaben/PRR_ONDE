@@ -276,12 +276,14 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE) {
     ggplot2::xlab("Mois") +
     ggplot2::scale_fill_manual(
       name = "Situation stations",
-      values = c("Ecoulement visible" = "#4575b4",
-                 "Ecoulement visible acceptable" = "#4575b4",
-                 "Ecoulement visible faible" = "#bdd7e7",
+      values = c("Donnée manquante" = "grey90",
+                 "Observation impossible" = "grey50",
                  "Assec" = "#d73027",
                  "Ecoulement non visible" = "#fe9929",
-                 "Observation impossible" = "grey50")
+                 "Ecoulement visible faible" = "#bdd7e7",
+                 "Ecoulement visible acceptable" = "#4575b4",
+                 "Ecoulement visible" = "#4575b4"
+                 ),
     ) +
     ggplot2::theme_bw() +
     ggplot2::theme(
