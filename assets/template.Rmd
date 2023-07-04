@@ -67,6 +67,26 @@ Les **observations impossibles** et **données manquantes** sont également repr
 
 <br>
 
+```{r}
+campagne_en_cours <- stations_onde_geo_map1 %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::filter(libelle_type_campagne == "usuelle") %>% 
+  dplyr::distinct(Mois, Annee) %>% 
+  dplyr::mutate(
+    mois = dplyr::case_when(
+      Mois == "05" ~ "de mai",
+      Mois == "06" ~ "de juin",
+      Mois == "07" ~ "de juillet",
+      Mois == "08" ~ "d'août",
+      Mois == "09" ~ "de septembre"
+    )
+  ) %>% 
+  dplyr::mutate(campagne = paste(mois, Annee)) %>% 
+  dplyr::pull(campagne)
+```
+
+**Campagne `r campagne_en_cours`**
+
 ### Typologie nationale
 
 ```{r}
