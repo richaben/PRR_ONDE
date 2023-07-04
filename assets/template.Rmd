@@ -155,7 +155,8 @@ campagne_en_cours <- stations_onde_geo_map1 %>%
         lat1 = bbox[["ymin"]],
         lng2 = bbox[["xmax"]],
         lat2 = bbox[["ymax"]]
-      )
+      ) %>% 
+    leafem::addHomeButton(group = "Departements")
     
     map
   }
