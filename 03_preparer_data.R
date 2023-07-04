@@ -48,8 +48,7 @@ if (to_update) {
     dplyr::filter(etat_station == 'Active') %>% 
     dplyr::mutate(
       Annee = as.numeric(Annee),
-      Mois = format(as.Date(date_campagne), "%m"), 
-      Mois_campagne = lubridate::ym(paste0(Annee,Mois,sep="-"))
+      Mois = format(as.Date(date_campagne), "%m")
       ) %>% 
     dplyr::mutate(
       lib_ecoul3mod = dplyr::case_when(
@@ -64,14 +63,48 @@ if (to_update) {
     ) %>% 
     dplyr::select(
       code_station, libelle_station,
-      date_campagne, Annee, Mois, Mois_campagne,
+      date_campagne, Annee, Mois, 
       lib_ecoul3mod, lib_ecoul4mod,
       libelle_type_campagne,
       longitude, latitude,
       code_departement,
       etat_station
-      )
-  
+      ) %>% 
+    (function(df_temp) {
+      dplyr::bind_rows(
+        df_temp %>% 
+          dplyr::filter(libelle_type_campagne == "complémentaire"),
+        df_temp %>% 
+          dplyr::filter(
+            libelle_type_campagne == "usuelle"
+          ) %>% 
+          tidyr::complete(
+            tidyr::nesting(code_station, libelle_station, longitude, latitude, code_departement, etat_station),
+            Annee, Mois,
+            fill = list(
+              libelle_type_campagne = "usuelle",
+              lib_ecoul3mod = "Donnée manquante",
+              lib_ecoul4mod = "Donnée manquante"
+            )
+          ) %>% 
+          dplyr::mutate(
+            date_campagne = dplyr::if_else(
+              is.na(date_campagne),
+              lubridate::as_date(paste0(Annee, "-", as.numeric(Mois), "-25")),
+              date_campagne
+            )
+          ) %>% 
+          dplyr::filter(
+            date_campagne <= Sys.Date()
+          )
+      ) %>% 
+        dplyr::arrange(
+          Annee, Mois, dplyr::desc(libelle_type_campagne)
+        ) %>% 
+        dplyr::mutate(Mois_campagne = lubridate::ym(paste0(Annee,Mois,sep="-")))
+      
+    })
+
   onde_usuel <- onde_periode %>% 
     dplyr::filter(
       libelle_type_campagne == "usuelle",
@@ -373,8 +406,7 @@ if (to_update) {
     dplyr::group_by(code_station, libelle_type_campagne) %>% 
     dplyr::filter(date_campagne == max(date_campagne)) %>% 
     dplyr::ungroup() %>% 
-    dplyr::mutate(id = seq(dplyr::n()))%>%
-    # dplyr::slice(seq(2)) %>% 
+    dplyr::mutate(id = paste0(code_station, '_', libelle_type_campagne)) %>%
     dplyr::mutate(
       icone_3mod = dplyr::case_when(
         libelle_type_campagne == "usuelle" &
