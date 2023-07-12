@@ -87,7 +87,7 @@ campagne_en_cours <- stations_onde_geo_map1 %>%
   dplyr::pull(campagne)
 ```
 
-**Campagne `r campagne_en_cours`**
+**Campagne usuelle `r campagne_en_cours`**
 
 ### Typologie nationale
 
