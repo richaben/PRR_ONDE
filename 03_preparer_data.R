@@ -400,17 +400,16 @@ if (to_update) {
     format("%m/%Y")
   
   # Données cartes
-  stations_onde_geo_map1 <-
-    # stations_onde_geo_usuelles %>% 
-    # dplyr::left_join(
-    #   onde_dernieres_campagnes %>% 
-    #     dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod )
-    # )
-  onde_periode %>% 
+  stations_onde_geo_map1 <- onde_periode %>% 
     dplyr::group_by(code_station) %>% 
     dplyr::mutate(pourcentage_assecs = length(lib_ecoul3mod[lib_ecoul3mod=='Assec' & libelle_type_campagne == "usuelle"]) / length(lib_ecoul3mod[libelle_type_campagne == "usuelle"])) %>% 
     dplyr::group_by(code_station, libelle_type_campagne) %>% 
     dplyr::filter(date_campagne == max(date_campagne)) %>% 
+    dplyr::group_by(code_station) %>% 
+    dplyr::filter(
+      libelle_type_campagne == "usuelle" | 
+        date_campagne == max(date_campagne)
+      ) %>% 
     dplyr::ungroup() %>% 
     dplyr::mutate(id = paste0(code_station, '_', libelle_type_campagne)) %>%
     dplyr::mutate(
