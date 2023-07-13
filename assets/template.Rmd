@@ -52,9 +52,11 @@ load("../data/processed_data/donnees_cartes.rda")
 
 Les cartes se lisent de la manière suivante :
 
--   La couleur des points correspond à la situation des dernières observations (usuelles ou complémentaires) sur les stations. **Les données affichées peuvent donc ne pas être comparables si les suivis n'ont pas été réalisés à la même période** ;
--   Les tailles des points sont proportionnelles à la fréquence des assecs sur les chroniques de données des campagnes usuelles ;
--   En cliquant sur une station, un graphique de l'historique des observations et états d'écoulement peut être affiché ;.
+-   La forme des symboles correspond au type de campagne: carré pour les campagnes usuelles, rond pour les campagnes complémentaires ;
+-   La dernière campagne usuelle est représentée et seules les observations complémentaires postérieures à cette campagne sont représentées ;
+-   La couleur des symbole correspond à la situation des observations au cours de ces dernières campagnes ;
+-   La taille des symbole est proportionnelle à la fréquence des assecs sur les chroniques de données des campagnes usuelles ;
+-   En cliquant sur une station, un graphique de l'historique des observations et états d'écoulement peut être affiché. Ce graphique reprend la même symbologie que la carte ;
 -   Avec le menu déroulant (en haut à droite), différents éléments cartographiques peuvent être affichés (i.e. fonds de cartes, départements, assecs, zones d'alerte Propluvia).
 
 Deux onglets pour les deux typologies d'observations sont distingués:
@@ -66,6 +68,26 @@ Deux onglets pour les deux typologies d'observations sont distingués:
 Les **observations impossibles** et **données manquantes** sont également représentées.
 
 <br>
+
+```{r}
+campagne_en_cours <- stations_onde_geo_map1 %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::filter(libelle_type_campagne == "usuelle") %>% 
+  dplyr::distinct(Mois, Annee) %>% 
+  dplyr::mutate(
+    mois = dplyr::case_when(
+      Mois == "05" ~ "de mai",
+      Mois == "06" ~ "de juin",
+      Mois == "07" ~ "de juillet",
+      Mois == "08" ~ "d'août",
+      Mois == "09" ~ "de septembre"
+    )
+  ) %>% 
+  dplyr::mutate(campagne = paste(mois, Annee)) %>% 
+  dplyr::pull(campagne)
+```
+
+**Campagne usuelle `r campagne_en_cours`**
 
 ### Typologie nationale
 
@@ -126,14 +148,15 @@ Les **observations impossibles** et **données manquantes** sont également repr
         overlayGroups = c("Suivi Onde", "Departements", 'Zones alerte', 'Anciennes stations', "Masque"),
         options       = leaflet::layersControlOptions(collapsed = TRUE)
       ) %>% 
-      
       leaflet::hideGroup("Zones alerte") %>% 
+      leaflet::hideGroup("Anciennes stations") %>% 
       leaflet::fitBounds(
         lng1 = bbox[["xmin"]],
         lat1 = bbox[["ymin"]],
         lng2 = bbox[["xmax"]],
         lat2 = bbox[["ymax"]]
-      )
+      ) %>% 
+    leafem::addHomeButton(group = "Departements")
     
     map
   }
@@ -163,38 +186,42 @@ Les **observations impossibles** et **données manquantes** sont également repr
       x
     })
 
+   stations_onde_geo_map1 <- stations_onde_geo_map1 %>% 
+        dplyr::arrange(code_station, date_campagne)
 ```
 
 ```{r cartoDynamique 3mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
-(
-  map_situation +
-  mapview::mapview(
-    stations_onde_geo_map1,
-    cex = "pourcentage_assecs",
-    layer.name = "Suivi Onde",
-    legend = FALSE,
-    alpha.regions = 0.9,
-    zcol = "label_point_3mod",
-    popup = leafpop::popupImage(popups_3mod[stations_onde_geo_map1$code_station],
-                                height = 290, width = 400),
-    col.regions = stations_onde_geo_map1$Couleur_3mod,
-    homebutton = T
-  ) +
-  if (nrow(stations_anciennes_onde_geo_map1) > 0) {
-    mapview::mapview(
-      stations_anciennes_onde_geo_map1,
-      layer.name = "Anciennes stations",
-      legend = FALSE,
-      alpha.regions = 0.1,
-      zcol = "label_point_3mod",
-      hide = T,
-      popup = leafpop::popupImage(popups_3mod[stations_anciennes_onde_geo_map1$code_station],
-                                  height = 290, width = 400),
-      col.regions = '#FFFFFF',
-      homebutton = F
-    )
-  }
-) %>%
+map_3mod <- map_situation
+
+map_3mod@map <- map_3mod@map %>% 
+  leaflet::addMarkers(
+    data = stations_onde_geo_map1,
+    group = "Suivi Onde",
+    icon = ~icones_3mod[as.character(id)],
+    label = ~lapply(paste0(libelle_station, " (", code_station, ")<br>", lib_ecoul3mod, " (", date_campagne, ")"), htmltools::HTML)
+    ) %>% 
+  leafpop::addPopupImages(
+    group = "Suivi Onde",
+    image = popups_3mod[stations_onde_geo_map1$code_station],
+    width = 400, height = 290
+  )
+
+if (nrow(stations_inactives_onde_geo) > 0) {
+  map_3mod@map <- map_3mod@map %>% 
+        leaflet::addMarkers(
+          data = stations_inactives_onde_geo,
+          group = "Anciennes stations",
+          icon = leaflet::makeIcon(iconUrl = "www/icons/abandonnee.png",iconWidth = 17, iconHeight = 17),
+          label = ~lapply(label_station, htmltools::HTML)
+        ) %>% 
+        leafpop::addPopupImages(
+          group = "Anciennes stations",
+          image = popups_3mod[stations_inactives_onde_geo$code_station],
+          width = 400, height = 290
+        )
+}
+
+map_3mod %>%
   finalize_map(bbox = depts_sel_bbox)
 
 ```
@@ -202,37 +229,38 @@ Les **observations impossibles** et **données manquantes** sont également repr
 ### Typologie départementale
 
 ```{r cartoDynamique 4mod, fig.height = 7, fig.width = 11, align = "center", warning = FALSE}
-(
-  map_situation +
-  mapview::mapview(
-    stations_onde_geo_map1,
-    cex = "pourcentage_assecs",
-    layer.name = "Suivi Onde",
-    legend = FALSE,
-    alpha.regions = 0.9,
-    zcol = "label_point_4mod",
-    popup = leafpop::popupImage(popups_4mod[stations_onde_geo_map1$code_station],
-                                height = 290, width = 400),
-    col.regions = stations_onde_geo_map1$Couleur_4mod,
-    homebutton = T
-  ) +
-  if (nrow(stations_anciennes_onde_geo_map1) > 0) {
-    mapview::mapview(
-      stations_anciennes_onde_geo_map1,
-      layer.name = "Anciennes stations",
-      legend = FALSE,
-      alpha.regions = 0.1,
-      zcol = "label_point_4mod",
-      hide = T,
-      popup = leafpop::popupImage(popups_4mod[stations_anciennes_onde_geo_map1$code_station],
-                                  height = 290, width = 400),
-      col.regions = '#FFFFFF',
-      homebutton = F
-    )
-  }
-) %>%
-  finalize_map(bbox = depts_sel_bbox)
+map_4mod <- map_situation
 
+  map_4mod@map <- map_4mod@map %>% 
+    leaflet::addMarkers(
+      data = stations_onde_geo_map1,
+    group = "Suivi Onde",
+    icon = ~icones_4mod[as.character(id)],
+    label = ~lapply(paste0(libelle_station, " (", code_station, ")<br>", lib_ecoul4mod, " (", date_campagne, ")"), htmltools::HTML)
+    ) %>% 
+    leafpop::addPopupImages(
+      group = "Suivi Onde",
+      image = popups_4mod[stations_onde_geo_map1$code_station],
+      width = 400, height = 290
+    )
+
+  if (nrow(stations_inactives_onde_geo) > 0) {
+    map_4mod@map <- map_4mod@map %>% 
+      leaflet::addMarkers(
+        data = stations_inactives_onde_geo,
+        group = "Anciennes stations",
+        icon = leaflet::makeIcon(iconUrl = "www/icons/abandonnee.png",iconWidth = 17, iconHeight = 17),
+        label = ~lapply(label_station, htmltools::HTML)
+        ) %>% 
+      leafpop::addPopupImages(
+        group = "Anciennes stations",
+        image = popups_4mod[stations_inactives_onde_geo$code_station],
+        width = 400, height = 290
+      )
+    }
+
+map_4mod %>%
+  finalize_map(bbox = depts_sel_bbox)
 ```
 
 ## Bilan régional
@@ -243,13 +271,13 @@ Les **observations impossibles** et **données manquantes** sont également repr
 
 #### Typologie nationale
 
-```{r bilan observation, fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
+```{r bilan observation, fig.height = 5.5, fig.width = 9, align = "center", warning = FALSE}
 bilan_cond_reg_typo_nat
 ```
 
 #### Typologie départementale
 
-```{r fig.height = 5.5, fig.width = 8, align = "center", warning = FALSE}
+```{r fig.height = 5.5, fig.width = 9, align = "center", warning = FALSE}
 bilan_cond_reg_typo_dep
 ```
 
@@ -271,7 +299,7 @@ assecs_consecutifs_reg
 
 ## Bilans départementaux {.tabset}
 
-```{r, results='asis'}
+```{r, results='asis', fig.height=5.5, fig.width=9, align='center'}
 for (d in conf_dep) {
   if (d %in% df_categ_obs_4mod$code_departement) {
     cat(paste0("\n### ", d, "\n"))

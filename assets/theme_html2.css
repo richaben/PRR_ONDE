@@ -1,3 +1,7 @@
+.leaflet-popup-content {
+  width: 401px !important;
+}
+
 div.main-container {
   max-width: 1200px !important;
 }

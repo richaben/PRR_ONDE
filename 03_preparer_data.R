@@ -48,8 +48,7 @@ if (to_update) {
     dplyr::filter(etat_station == 'Active') %>% 
     dplyr::mutate(
       Annee = as.numeric(Annee),
-      Mois = format(as.Date(date_campagne), "%m"), 
-      Mois_campagne = lubridate::ym(paste0(Annee,Mois,sep="-"))
+      Mois = format(as.Date(date_campagne), "%m")
       ) %>% 
     dplyr::mutate(
       lib_ecoul3mod = dplyr::case_when(
@@ -64,14 +63,48 @@ if (to_update) {
     ) %>% 
     dplyr::select(
       code_station, libelle_station,
-      date_campagne, Annee, Mois, Mois_campagne,
+      date_campagne, Annee, Mois, 
       lib_ecoul3mod, lib_ecoul4mod,
       libelle_type_campagne,
       longitude, latitude,
       code_departement,
       etat_station
-      )
-  
+      ) %>% 
+    (function(df_temp) {
+      dplyr::bind_rows(
+        df_temp %>% 
+          dplyr::filter(libelle_type_campagne == "complémentaire"),
+        df_temp %>% 
+          dplyr::filter(
+            libelle_type_campagne == "usuelle"
+          ) %>% 
+          tidyr::complete(
+            tidyr::nesting(code_station, libelle_station, longitude, latitude, code_departement, etat_station),
+            Annee, Mois,
+            fill = list(
+              libelle_type_campagne = "usuelle",
+              lib_ecoul3mod = "Donnée manquante",
+              lib_ecoul4mod = "Donnée manquante"
+            )
+          ) %>% 
+          dplyr::mutate(
+            date_campagne = dplyr::if_else(
+              is.na(date_campagne),
+              lubridate::as_date(paste0(Annee, "-", as.numeric(Mois), "-25")),
+              date_campagne
+            )
+          ) %>% 
+          dplyr::filter(
+            date_campagne <= Sys.Date()
+          )
+      ) %>% 
+        dplyr::arrange(
+          Annee, Mois, dplyr::desc(libelle_type_campagne)
+        ) %>% 
+        dplyr::mutate(Mois_campagne = lubridate::ym(paste0(Annee,Mois,sep="-")))
+      
+    })
+
   onde_usuel <- onde_periode %>% 
     dplyr::filter(
       libelle_type_campagne == "usuelle",
@@ -158,11 +191,17 @@ if (to_update) {
   
   ## coordonnes stations abandonnees EPSG 2154 RGF93
   stations_inactives_onde_geo <- onde_dernieres_campagnes_anciennes_stations %>% 
-    dplyr::ungroup() %>% 
-    dplyr::select(
+    dplyr::group_by(
       code_station ,libelle_station,
       longitude, latitude,
       code_departement
+    ) %>% 
+    dplyr::summarise(
+      label_station = paste0(
+        libelle_station, " (", code_station, ")<br>",
+        "Abandonnée en ", lubridate::year(date_campagne)
+        ),
+      .groups = "drop"
     ) %>% 
     sf::st_as_sf(
       coords = c("longitude", "latitude"), 
@@ -220,9 +259,10 @@ if (to_update) {
     prep_data_bilan(
       mod = lib_ecoul3mod,
       mod_levels = c("Ecoulement visible",
-                   #"Ecoulement visible faible",
-                   "Ecoulement non visible",
-                   "Assec"),
+                     "Ecoulement non visible",
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante"),
       code_departement
     )
 
@@ -230,9 +270,10 @@ if (to_update) {
     prep_data_bilan(
       mod = lib_ecoul3mod,
       mod_levels = c("Ecoulement visible",
-                     #"Ecoulement visible faible",
                      "Ecoulement non visible",
-                     "Assec")
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante")
     )
   
   df_categ_obs_4mod <- onde_usuel %>% 
@@ -241,7 +282,9 @@ if (to_update) {
       mod_levels = c("Ecoulement visible acceptable",
                      "Ecoulement visible faible",
                      "Ecoulement non visible",
-                     "Assec"),
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante"),
       code_departement
     )
 
@@ -251,7 +294,9 @@ if (to_update) {
       mod_levels = c("Ecoulement visible acceptable",
                      "Ecoulement visible faible",
                      "Ecoulement non visible",
-                     "Assec")
+                     "Assec",
+                     "Observation impossible",
+                     "Donnée manquante")
     )
   
   ## Heatmap
@@ -361,12 +406,64 @@ if (to_update) {
     format("%m/%Y")
   
   # Données cartes
-  stations_onde_geo_map1 <-
-    stations_onde_geo_usuelles %>% 
-    dplyr::left_join(
-      onde_dernieres_campagnes %>% 
-        dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod )
-    )
+  stations_onde_geo_map1 <- onde_periode %>% 
+    dplyr::group_by(code_station) %>% 
+    dplyr::mutate(pourcentage_assecs = length(lib_ecoul3mod[lib_ecoul3mod=='Assec' & libelle_type_campagne == "usuelle"]) / length(lib_ecoul3mod[libelle_type_campagne == "usuelle"])) %>% 
+    dplyr::group_by(code_station, libelle_type_campagne) %>% 
+    dplyr::filter(date_campagne == max(date_campagne)) %>% 
+    dplyr::group_by(code_station) %>% 
+    dplyr::filter(
+      libelle_type_campagne == "usuelle" | 
+        date_campagne == max(date_campagne)
+      ) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(id = paste0(code_station, '_', libelle_type_campagne)) %>%
+    dplyr::mutate(
+      icone_3mod = dplyr::case_when(
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Assec" ~
+          "../www/icons/usuelle_assec.png",
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Ecoulement non visible" ~ 
+          "../www/icons/usuelle_ecoulement_non_visible.png",
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Ecoulement visible" ~
+          "../www/icons/usuelle_ecoulement_visible.png",
+        libelle_type_campagne == "usuelle" & 
+          lib_ecoul3mod == "Observation impossible" ~ 
+          "../www/icons/usuelle_observation_impossible.png",
+        libelle_type_campagne == "usuelle" &
+          lib_ecoul3mod == "Donnée manquante" ~ 
+          "../www/icons/usuelle_donnee_manquante.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Assec" ~ 
+          "../www/icons/complementaire_assec.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Ecoulement non visible" ~
+          "../www/icons/complementaire_ecoulement_non_visible.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Ecoulement visible" ~ 
+          "../www/icons/complementaire_ecoulement_visible.png",
+        libelle_type_campagne == "complémentaire" &
+          lib_ecoul3mod == "Observation impossible" ~
+          "../www/icons/complementaire_observation_impossible.png",
+        libelle_type_campagne == "complémentaire" & 
+          lib_ecoul3mod == "Donnée manquante" ~ 
+          "../www/icons/complementaire_donnee_manquante.png"
+      )
+    ) %>% 
+    dplyr::mutate(
+      icone_4mod = dplyr::if_else(
+        lib_ecoul4mod == "Ecoulement visible faible",
+        stringr::str_replace_all(
+          string = icone_3mod, 
+          pattern = "ecoulement_visible", 
+          replacement = "ecoulement_faible"
+        ),
+        icone_3mod
+      )
+    ) %>% 
+    sf::st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
   
   depts_sel <- depts %>%
     dplyr::filter(code_insee %in% conf_dep) %>% 
@@ -379,6 +476,52 @@ if (to_update) {
       depts_sel %>% 
         dplyr::summarise()
     )
+  
+  icones_3mod <- stations_onde_geo_map1  %>% 
+    dplyr::rowwise() %>% 
+    dplyr::group_split() %>% 
+    purrr::map(
+      function(df_i) {
+        leaflet::makeIcon(
+          iconUrl = df_i$icone_3mod,
+          iconWidth = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
+          iconHeight = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
+        )
+      }
+    ) %>% 
+    purrr::set_names(stations_onde_geo_map1$id) %>% 
+    (function(l) {
+      # code adapté de leaflet::iconList
+      res <- structure(l, class = "leaflet_icon_set")
+      cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+      if (any(!cls))
+        stop("Arguments passed must be icon objects returned from makeIcon()")
+      res
+    })
+  
+  icones_4mod <- stations_onde_geo_map1  %>% 
+    dplyr::rowwise() %>% 
+    dplyr::group_split() %>% 
+    purrr::map(
+      function(df_i) {
+        leaflet::makeIcon(
+          iconUrl = df_i$icone_4mod,
+          iconWidth = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
+          iconHeight = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
+        )
+      }
+    ) %>% 
+    purrr::set_names(stations_onde_geo_map1$id) %>% 
+    (function(l) {
+      # code adapté de leaflet::iconList
+      res <- structure(l, class = "leaflet_icon_set")
+      cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+      if (any(!cls))
+        stop("Arguments passed must be icon objects retruned from makeIcon()")
+      res
+    })
+  
+  
   
   stations_anciennes_onde_geo_map1 <-
     stations_inactives_onde_geo %>% 
@@ -394,6 +537,8 @@ if (to_update) {
     date_derniere_campagne_comp,
     df_categ_obs_4mod,
     stations_onde_geo_map1,
+    icones_3mod, icones_4mod,
+    stations_inactives_onde_geo,
     stations_anciennes_onde_geo_map1,
     masque_eu,
     depts_sel,
