@@ -191,11 +191,17 @@ if (to_update) {
   
   ## coordonnes stations abandonnees EPSG 2154 RGF93
   stations_inactives_onde_geo <- onde_dernieres_campagnes_anciennes_stations %>% 
-    dplyr::ungroup() %>% 
-    dplyr::select(
+    dplyr::group_by(
       code_station ,libelle_station,
       longitude, latitude,
       code_departement
+    ) %>% 
+    dplyr::summarise(
+      label_station = paste0(
+        libelle_station, " (", code_station, ")<br>",
+        "Abandonnée en ", lubridate::year(date_campagne)
+        ),
+      .groups = "drop"
     ) %>% 
     sf::st_as_sf(
       coords = c("longitude", "latitude"), 
@@ -489,7 +495,7 @@ if (to_update) {
       res <- structure(l, class = "leaflet_icon_set")
       cls <- unlist(lapply(res, inherits, "leaflet_icon"))
       if (any(!cls))
-        stop("Arguments passed must be icon objects retruned from makeIcon()")
+        stop("Arguments passed must be icon objects returned from makeIcon()")
       res
     })
   
@@ -532,6 +538,7 @@ if (to_update) {
     df_categ_obs_4mod,
     stations_onde_geo_map1,
     icones_3mod, icones_4mod,
+    stations_inactives_onde_geo,
     stations_anciennes_onde_geo_map1,
     masque_eu,
     depts_sel,
