@@ -134,8 +134,12 @@ if (to_update) {
       graph1
     }
   
-  list.files("www/png", recursive = TRUE, full.names = TRUE) %>% 
-    purrr::walk(file.remove)
+  if (dir.exists("www/png"))
+    unlink("www/png", recursive = TRUE)
+  if (dir.exists("www/popups"))
+    unlink("www/popups", recursive = TRUE)
+  
+  dir.create("www/popups")
   
   ### -> graphiques 3modalités
   graphiques_int_3mod <- 
@@ -154,7 +158,7 @@ if (to_update) {
     function(station) {
       ggplot2::ggsave(
         plot = graphiques_int_3mod[[station]],
-        filename = paste0("www/png/3mod/", station, ".png"),
+        filename = paste0("www/popups/3mod/", station, ".png"),
         width = 14,
         height = 10,
         units = "cm",
@@ -180,7 +184,7 @@ if (to_update) {
     function(station) {
       ggplot2::ggsave(
         plot = graphiques_int_4mod[[station]],
-        filename = paste0("www/png/4mod/", station, ".png"),
+        filename = paste0("www/popups/4mod/", station, ".png"),
         width = 14,
         height = 10,
         units = "cm",
@@ -206,7 +210,7 @@ if (to_update) {
     function(station) {
       ggplot2::ggsave(
         plot = graphiques_int_3mod_old[[station]],
-        filename = paste0("www/png/3mod/", station, ".png"),
+        filename = paste0("www/popups/3mod/", station, ".png"),
         width = 14,
         height = 10,
         units = "cm",
@@ -232,7 +236,7 @@ if (to_update) {
     function(station) {
       ggplot2::ggsave(
         plot = graphiques_int_4mod_old[[station]],
-        filename = paste0("www/png/4mod/", station, ".png"),
+        filename = paste0("www/popups/4mod/", station, ".png"),
         width = 14,
         height = 10,
         units = "cm",
