@@ -4,7 +4,7 @@
 #                      #
 ##%##################%##
 
-import::from("dplyr", '%>%')
+'%>%' <- dplyr::'%>%'
 
 date_jour <- as.character(format(Sys.time(),"%Y-%m-%d"))
 date_jour_heure <- as.character(format(Sys.time(),"%Y-%m-%d_%Hh%m"))
