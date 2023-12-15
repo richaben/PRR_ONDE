@@ -26,26 +26,26 @@ Voir <https://github.com/richaben/PRR_ONDE/blob/master/Install.md#d%C3%A9sinstal
 
 ## Déploiement dans les régions
 
--   [Hauts-de-France](https://github.com/OFB-HdF/PRR_ONDE): <https://ofb-hdf.github.io/PRR_ONDE/>
+-   Hauts-de-France [![](images/github-mark-white_18px.png)](https://github.com/OFB-HdF/PRR_ONDE) : <https://ofb-hdf.github.io/PRR_ONDE/>
 
--   [Normandie](https://github.com/OFB-Nor/PRR_ONDE): <https://ofb-nor.github.io/PRR_ONDE/>
+-   Normandie [![](images/github-mark-white_18px.png)](https://github.com/OFB-Nor/PRR_ONDE) : <https://ofb-nor.github.io/PRR_ONDE/>
 
--   [Île-de-France](https://github.com/OFB-IdF/PRR_ONDE): <https://ofb-idf.github.io/PRR_ONDE/>
+-   Île-de-France [![](images/github-mark-white_18px.png)](https://github.com/OFB-IdF/PRR_ONDE) : <https://ofb-idf.github.io/PRR_ONDE/>
 
--   [Grand Est](https://github.com/Josefine57/PRR_ONDE): <https://josefine57.github.io/PRR_ONDE/>
+-   Grand Est [![](images/github-mark-white_18px.png)](https://github.com/Josefine57/PRR_ONDE) : <https://josefine57.github.io/PRR_ONDE/>
 
--   [Bretagne](https://github.com/ofb-bzh/PRR_ONDE): <https://ofb-bzh.github.io/PRR_ONDE/>
+-   Bretagne [![](images/github-mark-white_18px.png)](https://github.com/ofb-bzh/PRR_ONDE) : <https://ofb-bzh.github.io/PRR_ONDE/>
 
--   [Pays de la Loire](https://github.com/ofb-pdl/PRR_ONDE): <https://ofb-pdl.github.io/PRR_ONDE/>
+-   Pays de la Loire [![](images/github-mark-white_18px.png)](https://github.com/ofb-pdl/PRR_ONDE) : <https://ofb-pdl.github.io/PRR_ONDE/>
 
--   [Centre-Val de Loire](https://github.com/ofb-CVL/PRR_ONDE): <https://ofb-cvl.github.io/PRR_ONDE/>
+-   Centre-Val de Loire [![](images/github-mark-white_18px.png)](https://github.com/ofb-CVL/PRR_ONDE) : <https://ofb-cvl.github.io/PRR_ONDE/>
 
--   [Bourgogne-Franche-Comté](https://github.com/OFB-BFC/PRR_ONDE): <https://ofb-bfc.github.io/PRR_ONDE/>
+-   Bourgogne-Franche-Comté [![](images/github-mark-white_18px.png)](https://github.com/OFB-BFC/PRR_ONDE) : <https://ofb-bfc.github.io/PRR_ONDE/>
 
--   [Nouvelle-Aquitaine](https://github.com/OFB-NA/PRR_ONDE): <https://ofb-na.github.io/PRR_ONDE/>
+-   Nouvelle-Aquitaine [![](images/github-mark-white_18px.png)](https://github.com/OFB-NA/PRR_ONDE) : <https://ofb-na.github.io/PRR_ONDE/>
 
--   [Auvergne-Rhône-Alpes](https://github.com/ofb-aura/PRR_ONDE): <https://ofb-aura.github.io/PRR_ONDE/>
+-   Auvergne-Rhône-Alpes [![](images/github-mark-white_18px.png)](https://github.com/ofb-aura/PRR_ONDE) : <https://ofb-aura.github.io/PRR_ONDE/>
 
--   [Occitanie](https://github.com/OFB-OCC/PRR_ONDE): <https://ofb-occ.github.io/PRR_ONDE/>
+-   Occitanie [![](images/github-mark-white_18px.png)](https://github.com/OFB-OCC/PRR_ONDE) : <https://ofb-occ.github.io/PRR_ONDE/>
 
--   [Provence-Alpes-Côte d'Azur et Corse](https://github.com/SRC-PacaCorse/PRR_ONDE): <https://src-pacacorse.github.io/PRR_ONDE/>
+-   Provence-Alpes-Côte d'Azur et Corse [![](images/github-mark-white_18px.png)](https://github.com/SRC-PacaCorse/PRR_ONDE) : <https://src-pacacorse.github.io/PRR_ONDE/>
