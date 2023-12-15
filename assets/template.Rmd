@@ -162,26 +162,26 @@ campagne_en_cours <- stations_onde_geo_map1 %>%
   }
   
   popups_3mod <- file.path(
-    "www/png/3mod", 
-    list.files(path = "../www/png/3mod/", pattern = ".png")
+    "www/popups/3mod", 
+    list.files(path = "../www/popups/3mod/", pattern = ".webp")
     ) %>% 
     (function(x) {
       names(x) <- x %>% 
-        stringr::str_remove_all(pattern = "www/png/3mod/") %>% 
-        stringr::str_remove_all(pattern = ".png")
+        stringr::str_remove_all(pattern = "www/popups/3mod/") %>% 
+        stringr::str_remove_all(pattern = ".webp")
       
       x
     })
   
   
   popups_4mod <- file.path(
-    "www/png/4mod", 
-    list.files(path = "../www/png/4mod/", pattern = ".png")
+    "www/popups/4mod", 
+    list.files(path = "../www/popups/4mod/", pattern = ".webp")
     ) %>% 
     (function(x) {
       names(x) <- x %>% 
-        stringr::str_remove_all(pattern = "www/png/4mod/") %>% 
-        stringr::str_remove_all(pattern = ".png")
+        stringr::str_remove_all(pattern = "www/popups/4mod/") %>% 
+        stringr::str_remove_all(pattern = ".webp")
       
       x
     })
