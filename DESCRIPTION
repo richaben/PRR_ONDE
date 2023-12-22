@@ -6,23 +6,23 @@ Encoding: UTF-8
 Depends: 
     R (>= 4.0)
 Imports: 
-    tidyverse,
-    sf,
-    mapview,
-    leaflet,
-    leaflet.extras,
-    ggrepel,
-    glue,
+    tidyverse (== 2.0.0),
+    sf (== 1.0-14),
+    mapview (== 2.11.2),
+    leaflet (== 2.2.1),
+    leaflet.extras (== 1.0.0),
+    ggrepel (== 0.9.4),
+    glue (== 1.6.2),
     scales,
     data.table,
-    knitr,
-    rmarkdown,
-    htmltools,
-    leafem,
-    png,
-    webp,
-    hubeau,
-    ondetools
+    knitr (== 1.45),
+    rmarkdown (== 2.25),
+    htmltools (== 0.5.7),
+    leafem (== 0.2.3),
+    png (== 0.1-8),
+    webp (== 1.2.0),
+    hubeau (== 0.4.1),
+    ondetools (== 0.1.2)
 Remotes:
     richaben/ondetools
 RoxygenNote: 7.2.3
