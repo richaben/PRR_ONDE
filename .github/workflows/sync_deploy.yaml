@@ -40,18 +40,11 @@ jobs:
           use-public-rspm: true
       
       - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          packages: |
-            any::devtools
-      
+
       - uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: '2.17.1' # Pandoc version pour compiler.
       
-      - name: Installation dependencies
-        run: | 
-          Rscript "00_installation_packages.R"
-        
       - name: Verifier maj
         run: |
           Rscript "01_forcer_maj.R"
