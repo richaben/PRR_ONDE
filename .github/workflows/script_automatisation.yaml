@@ -19,6 +19,10 @@ jobs:
           use-public-rspm: true
           r-version: 4.2.2
       
+      - name: installation sf
+        run: |
+          Rscript -e 'install.packages("sf")'
+
       - uses: r-lib/actions/setup-r-dependencies@v2
             
       - uses: r-lib/actions/setup-pandoc@v2
