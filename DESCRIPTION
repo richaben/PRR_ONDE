@@ -1,0 +1,27 @@
+Package: PRR_ONDE
+Title: Synthèse automatique des données ONDE
+Version: 1.0.0
+URL: https://github.com/richaben/PRR_ONDE
+Encoding: UTF-8
+Depends: 
+    R (>= 4.0)
+Imports: 
+    tidyverse (== 2.0.0),
+    mapview (== 2.11.2),
+    leaflet (== 2.2.1),
+    leaflet.extras (== 1.0.0),
+    ggrepel (== 0.9.4),
+    glue (== 1.6.2),
+    scales,
+    data.table,
+    knitr (== 1.45),
+    rmarkdown (== 2.25),
+    htmltools (== 0.5.7),
+    leafem (== 0.2.3),
+    png (== 0.1-8),
+    webp (== 1.2.0),
+    hubeau (== 0.4.1),
+    ondetools (== 0.1.2)
+Remotes:
+    richaben/ondetools
+RoxygenNote: 7.2.3
