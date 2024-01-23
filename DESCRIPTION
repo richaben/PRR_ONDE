@@ -7,7 +7,6 @@ Depends:
     R (>= 4.0)
 Imports: 
     tidyverse (== 2.0.0),
-    sf (== 1.0-14),
     mapview (== 2.11.2),
     leaflet (== 2.2.1),
     leaflet.extras (== 1.0.0),
