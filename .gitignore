@@ -3,3 +3,7 @@
 .Ruserdata
 
 PRR_ONDE.Rproj
+
+.local/share/rstudio/
+
+.config/rstudio/
