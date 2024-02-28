@@ -145,11 +145,12 @@ campagne_en_cours <- stations_onde_geo_map1 %>%
                        group = 'ESRI relief') %>%
       leaflet::addLayersControl(
         baseGroups    = c("OSM", "Plan IGN", "Photo aérienne", "ESRI relief"),
-        overlayGroups = c("Suivi Onde", "Departements", 'Zones alerte', 'Anciennes stations', "Masque"),
+        overlayGroups = c("Suivi Onde", "Stations ONDE+", "Anciennes stations", "Departements", 'Zones alerte', "Masque"),
         options       = leaflet::layersControlOptions(collapsed = TRUE)
       ) %>% 
       leaflet::hideGroup("Zones alerte") %>% 
       leaflet::hideGroup("Anciennes stations") %>% 
+      leaflet::hideGroup("Stations ONDE+") %>%
       leaflet::fitBounds(
         lng1 = bbox[["xmin"]],
         lat1 = bbox[["ymin"]],
@@ -221,6 +222,22 @@ if (nrow(stations_inactives_onde_geo) > 0) {
         )
 }
 
+if (nrow(stations_onde_plus_geo_map1) > 0) {
+  map_3mod@map <- map_3mod@map %>% 
+        leaflet::addMarkers(
+          data = stations_onde_plus_geo_map1,
+          group = "Stations ONDE+",
+          icon = ~icones_3mod_plus[as.character(code_station)],
+          label = ~lapply(paste0(libelle_station, " (", code_station, ")<br>", lib_ecoul3mod, " (", date_campagne, ")"), htmltools::HTML)
+        ) %>% 
+        leafpop::addPopupImages(
+          group = "Stations ONDE+",
+          image = popups_3mod[stations_onde_plus_geo_map1$code_station],
+          width = 400, height = 290
+        )
+}
+
+
 map_3mod %>%
   finalize_map(bbox = depts_sel_bbox)
 
@@ -257,7 +274,23 @@ map_4mod <- map_situation
         image = popups_4mod[stations_inactives_onde_geo$code_station],
         width = 400, height = 290
       )
-    }
+  }
+  
+  if (nrow(stations_onde_plus_geo_map1) > 0) {
+  map_4mod@map <- map_4mod@map %>% 
+        leaflet::addMarkers(
+          data = stations_onde_plus_geo_map1,
+          group = "Stations ONDE+",
+          icon = ~icones_4mod_plus[as.character(code_station)],
+          label = ~lapply(paste0(libelle_station, " (", code_station, ")<br>", lib_ecoul4mod, " (", date_campagne, ")"), htmltools::HTML)
+        ) %>% 
+        leafpop::addPopupImages(
+          group = "Stations ONDE+",
+          image = popups_4mod[stations_onde_plus_geo_map1$code_station],
+          width = 400, height = 290
+        )
+}
+
 
 map_4mod %>%
   finalize_map(bbox = depts_sel_bbox)
