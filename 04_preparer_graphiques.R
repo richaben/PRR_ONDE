@@ -211,6 +211,32 @@ if (to_update) {
     purrr::set_names(stations_inactives_onde_geo$code_station) %>% 
     save_popups(dir = "www/popups/4mod/")
 
+  ### -> graphiques 3modalités stations onde+
+  purrr::map(
+    .x = stations_onde_plus_geo$code_station, 
+    .f = produire_graph_pour_une_station, 
+    type_mod = lib_ecoul3mod,
+    onde_df = onde_plus,
+    mod_levels = c("Assec", "Ecoulement\nnon visible", "Ecoulement\nvisible", "Observation\nimpossible", "Donnée\nmanquante"),
+    mod_colors = mes_couleurs_3mod
+  ) %>% 
+    purrr::set_names(stations_onde_plus_geo$code_station) %>% 
+    save_popups(dir = "www/popups/3mod/")
+  
+  ### -> graphiques 4modalités stations onde+
+  purrr::map(
+    .x = stations_onde_plus_geo$code_station, 
+    .f = produire_graph_pour_une_station, 
+    type_mod = lib_ecoul4mod,
+    onde_df = onde_plus,
+    mod_levels = c("Assec", "Ecoulement\nnon visible", "Ecoulement\nvisible\nfaible", "Ecoulement\nvisible\nacceptable", "Observation\nimpossible", "Donnée\nmanquante"),
+    mod_colors = mes_couleurs_4mod
+  ) %>% 
+    purrr::set_names(stations_onde_plus_geo$code_station) %>% 
+    save_popups(dir = "www/popups/4mod/")
+  
+  
+  
   ## Conditions d'écoulement lors des campagnes usuelles de l'année en cours
 plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE, modalites = ggplot2::waiver()) {
   data_bilan %>% 
