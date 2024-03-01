@@ -426,6 +426,7 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE, modali
         drop = FALSE
       ) +
       ggplot2::scale_y_continuous(labels = scales::percent_format(round_prec)) +
+      ggplot2::scale_x_discrete(limits = factor(sort(unique(df_assecs$Annee)))) +
       ggplot2::ggtitle("Proportions et nombre de stations concernées") +
       ggplot2::theme_bw() +
       ggplot2::theme(
