@@ -627,49 +627,54 @@ if (to_update) {
       )
     )
   
-  icones_3mod_plus <- stations_onde_plus_geo_map1  %>% 
-    dplyr::rowwise() %>% 
-    dplyr::group_split() %>% 
-    purrr::map(
-      function(df_i) {
-        leaflet::makeIcon(
-          iconUrl = df_i$icone_3mod,
-          iconWidth = 20,
-          iconHeight = 20
-        )
-      }
-    ) %>% 
-    purrr::set_names(stations_onde_plus_geo_map1$code_station) %>% 
-    (function(l) {
-      # code adapté de leaflet::iconList
-      res <- structure(l, class = "leaflet_icon_set")
-      cls <- unlist(lapply(res, inherits, "leaflet_icon"))
-      if (any(!cls))
-        stop("Arguments passed must be icon objects returned from makeIcon()")
-      res
-    })
+  if (nrow(stations_onde_plus_geo_map1) > 0) {
+    icones_3mod_plus <- stations_onde_plus_geo_map1  %>% 
+      dplyr::rowwise() %>% 
+      dplyr::group_split() %>% 
+      purrr::map(
+        function(df_i) {
+          leaflet::makeIcon(
+            iconUrl = df_i$icone_3mod,
+            iconWidth = 20,
+            iconHeight = 20
+          )
+        }
+      ) %>% 
+      purrr::set_names(stations_onde_plus_geo_map1$code_station) %>% 
+      (function(l) {
+        # code adapté de leaflet::iconList
+        res <- structure(l, class = "leaflet_icon_set")
+        cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+        if (any(!cls))
+          stop("Arguments passed must be icon objects returned from makeIcon()")
+        res
+      })
+    
+    icones_4mod_plus <- stations_onde_plus_geo_map1  %>% 
+      dplyr::rowwise() %>% 
+      dplyr::group_split() %>% 
+      purrr::map(
+        function(df_i) {
+          leaflet::makeIcon(
+            iconUrl = df_i$icone_4mod,
+            iconWidth = 20,
+            iconHeight = 20
+          )
+        }
+      ) %>% 
+      purrr::set_names(stations_onde_plus_geo_map1$code_station) %>% 
+      (function(l) {
+        # code adapté de leaflet::iconList
+        res <- structure(l, class = "leaflet_icon_set")
+        cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+        if (any(!cls))
+          stop("Arguments passed must be icon objects retruned from makeIcon()")
+        res
+      })
+  } else {
+    icones_3mod_plus <- icones_4mod_plus <- c()
+  }
   
-  icones_4mod_plus <- stations_onde_plus_geo_map1  %>% 
-    dplyr::rowwise() %>% 
-    dplyr::group_split() %>% 
-    purrr::map(
-      function(df_i) {
-        leaflet::makeIcon(
-          iconUrl = df_i$icone_4mod,
-          iconWidth = 20,
-          iconHeight = 20
-        )
-      }
-    ) %>% 
-    purrr::set_names(stations_onde_plus_geo_map1$code_station) %>% 
-    (function(l) {
-      # code adapté de leaflet::iconList
-      res <- structure(l, class = "leaflet_icon_set")
-      cls <- unlist(lapply(res, inherits, "leaflet_icon"))
-      if (any(!cls))
-        stop("Arguments passed must be icon objects retruned from makeIcon()")
-      res
-    })
   
   ########################
   # Sauvegarde des objets 
