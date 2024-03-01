@@ -17,9 +17,13 @@ if (to_update) {
     file = "data/onde_data/onde.csv",
     colClasses = "character"
     ) %>% 
+    dplyr::filter(!is.na(code_station)) %>%
     dplyr::mutate(
       date_campagne = lubridate::as_date(date_campagne, format = "%Y-%m-%d")
-      )
+      ) %>%
+    dplyr::group_by(code_station) %>%
+    dplyr::mutate(onde_plus = sum(libelle_type_campagne == "usuelle") == 0) %>%
+    dplyr::ungroup()
   
   # couleurs légendes
   mes_couleurs_3mod <- c(
@@ -45,7 +49,7 @@ if (to_update) {
   # toutes stations actives toutes annees
   onde_periode <- onde_df %>% 
     dplyr::select(-c(libelle_reseau, code_type_campagne)) %>% 
-    dplyr::filter(etat_station == 'Active') %>% 
+    dplyr::filter(etat_station == 'Active' & !onde_plus) %>% 
     dplyr::mutate(
       Annee = as.numeric(Annee),
       Mois = format(as.Date(date_campagne), "%m")
@@ -140,6 +144,36 @@ if (to_update) {
       code_departement,
       etat_station
     )
+ 
+  # stations ONDE+
+  onde_plus <- onde_df %>% 
+    dplyr::select(-c(libelle_reseau, code_type_campagne)) %>% 
+    dplyr::filter(etat_station == 'Active' & onde_plus) %>% 
+    dplyr::mutate(
+      Annee = as.numeric(Annee),
+      Mois = format(as.Date(date_campagne), "%m"), 
+      Mois_campagne = lubridate::ym(paste0(Annee,Mois,sep="-"))
+    ) %>% 
+    dplyr::mutate(
+      lib_ecoul3mod = dplyr::case_when(
+        libelle_ecoulement == 'Ecoulement visible faible' ~ 'Ecoulement visible',
+        libelle_ecoulement == 'Ecoulement visible acceptable' ~ 'Ecoulement visible',
+        TRUE ~ libelle_ecoulement
+      ),
+      lib_ecoul4mod = dplyr::case_when(
+        libelle_ecoulement == 'Ecoulement visible' ~ 'Ecoulement visible acceptable',
+        TRUE ~ libelle_ecoulement
+      )
+    ) %>% 
+    dplyr::select(
+      code_station, libelle_station,
+      date_campagne, Annee, Mois, Mois_campagne,
+      lib_ecoul3mod, lib_ecoul4mod,
+      libelle_type_campagne,
+      longitude, latitude,
+      code_departement,
+      etat_station
+    )
   
   ## selection sous tableau des dernieres campagnes
   selection_dernieres_campagnes <- function(df) {
@@ -167,15 +201,20 @@ if (to_update) {
     dplyr::filter(libelle_type_campagne == 'usuelle') %>% 
     selection_dernieres_campagnes()
   
-  onde_dernieres_campagnes_comp <-
-    onde_periode %>% 
+  onde_dernieres_campagnes_comp <- onde_periode %>% 
     dplyr::filter(libelle_type_campagne != 'usuelle') %>% 
     selection_dernieres_campagnes()
   
   onde_dernieres_campagnes_anciennes_stations <- onde_anciennes_stations %>% 
     selection_dernieres_campagnes()
   
-  ## coordonnes stations actives EPSG 2154 RGF93
+  onde_plus_dernieres_campagnes <- onde_plus %>%
+    selection_dernieres_campagnes() %>%
+    dplyr::group_by(code_station) %>%
+    dplyr::filter(date_campagne == max(date_campagne)) %>%
+    dplyr::ungroup()
+  
+  ## coordonnees stations actives EPSG 2154 RGF93
   stations_onde_geo <- onde_dernieres_campagnes_usuelles %>% 
     dplyr::ungroup() %>% 
     dplyr::select(
@@ -189,7 +228,7 @@ if (to_update) {
       ) %>% 
     sf::st_transform(crs = 2154)
   
-  ## coordonnes stations abandonnees EPSG 2154 RGF93
+  ## coordonnees stations abandonnees EPSG 2154 RGF93
   stations_inactives_onde_geo <- onde_dernieres_campagnes_anciennes_stations %>% 
     dplyr::group_by(
       code_station ,libelle_station,
@@ -208,6 +247,28 @@ if (to_update) {
       crs = 4326
     ) %>% 
     dplyr::mutate(label = paste0(libelle_station,' (',code_station,')'))
+  
+  ## coordonnees stations onde+ EPSG 2154 RGF93
+  stations_onde_plus_geo <- onde_plus_dernieres_campagnes %>% 
+    dplyr::group_by(
+      code_station ,libelle_station,
+      longitude, latitude,
+      code_departement
+    ) %>% 
+    dplyr::summarise(
+      label_station = paste0(
+        libelle_station, " (", code_station, ")<br>",
+        "Abandonnée en ", lubridate::year(date_campagne)
+      ),
+      .groups = "drop"
+    ) %>% 
+    sf::st_as_sf(
+      coords = c("longitude", "latitude"), 
+      crs = 4326
+    ) %>% 
+    dplyr::mutate(label = paste0(libelle_station,' (',code_station,')'))
+  
+  
   
   ## calculs assecs periode ete sur campagnes usuelles
   assecs <- onde_usuel %>% 
@@ -405,6 +466,11 @@ if (to_update) {
     max() %>% 
     format("%m/%Y")
   
+  date_derniere_campagne_onde_plus <- 
+    unique(onde_plus_dernieres_campagnes$Mois_campagne) %>%
+    max() %>%
+    format("%m/%Y")
+  
   # Données cartes
   stations_onde_geo_map1 <- onde_periode %>% 
     dplyr::group_by(code_station) %>% 
@@ -484,8 +550,8 @@ if (to_update) {
       function(df_i) {
         leaflet::makeIcon(
           iconUrl = df_i$icone_3mod,
-          iconWidth = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
-          iconHeight = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
+          iconWidth = approx(x = c(0,1), y = c(10, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
+          iconHeight = approx(x = c(0,1), y = c(10, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
         )
       }
     ) %>% 
@@ -506,8 +572,8 @@ if (to_update) {
       function(df_i) {
         leaflet::makeIcon(
           iconUrl = df_i$icone_4mod,
-          iconWidth = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
-          iconHeight = approx(x = c(0,1), y = c(8, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
+          iconWidth = approx(x = c(0,1), y = c(10, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0),
+          iconHeight = approx(x = c(0,1), y = c(10, 35), xout = df_i$pourcentage_assecs)$y + ifelse(df_i$libelle_type_campagne == "usuelle", 5, 0)
         )
       }
     ) %>% 
@@ -530,16 +596,100 @@ if (to_update) {
         dplyr::select(code_station, Couleur_3mod , Couleur_4mod, date_campagne, label_point_3mod , label_point_4mod)
     ) 
   
+  stations_onde_plus_geo_map1 <- stations_onde_plus_geo %>%
+    dplyr::left_join(
+      onde_plus_dernieres_campagnes %>%
+        dplyr::select(code_station, Couleur_3mod, Couleur_4mod, date_campagne, lib_ecoul3mod, lib_ecoul4mod, label_point_3mod, label_point_4mod)
+    )%>% 
+    dplyr::mutate(
+      icone_3mod = dplyr::case_when(
+        lib_ecoul3mod == "Assec" ~
+          "../www/icons/onde_plus_assec.png",
+        lib_ecoul3mod == "Ecoulement non visible" ~ 
+          "../www/icons/onde_plus_ecoulement_non_visible.png",
+        lib_ecoul3mod == "Ecoulement visible" ~
+          "../www/icons/onde_plus_ecoulement_visible.png",
+        lib_ecoul3mod == "Observation impossible" ~ 
+          "../www/icons/onde_plus_observation_impossible.png",
+        lib_ecoul3mod == "Donnée manquante" ~ 
+          "../www/icons/onde_plus_donnee_manquante.png"
+      )
+    ) %>% 
+    dplyr::mutate(
+      icone_4mod = dplyr::if_else(
+        lib_ecoul4mod == "Ecoulement visible faible",
+        stringr::str_replace_all(
+          string = icone_3mod, 
+          pattern = "ecoulement_visible", 
+          replacement = "ecoulement_faible"
+        ),
+        icone_3mod
+      )
+    )
+  
+  if (nrow(stations_onde_plus_geo_map1) > 0) {
+    icones_3mod_plus <- stations_onde_plus_geo_map1  %>% 
+      dplyr::rowwise() %>% 
+      dplyr::group_split() %>% 
+      purrr::map(
+        function(df_i) {
+          leaflet::makeIcon(
+            iconUrl = df_i$icone_3mod,
+            iconWidth = 20,
+            iconHeight = 20
+          )
+        }
+      ) %>% 
+      purrr::set_names(stations_onde_plus_geo_map1$code_station) %>% 
+      (function(l) {
+        # code adapté de leaflet::iconList
+        res <- structure(l, class = "leaflet_icon_set")
+        cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+        if (any(!cls))
+          stop("Arguments passed must be icon objects returned from makeIcon()")
+        res
+      })
+    
+    icones_4mod_plus <- stations_onde_plus_geo_map1  %>% 
+      dplyr::rowwise() %>% 
+      dplyr::group_split() %>% 
+      purrr::map(
+        function(df_i) {
+          leaflet::makeIcon(
+            iconUrl = df_i$icone_4mod,
+            iconWidth = 20,
+            iconHeight = 20
+          )
+        }
+      ) %>% 
+      purrr::set_names(stations_onde_plus_geo_map1$code_station) %>% 
+      (function(l) {
+        # code adapté de leaflet::iconList
+        res <- structure(l, class = "leaflet_icon_set")
+        cls <- unlist(lapply(res, inherits, "leaflet_icon"))
+        if (any(!cls))
+          stop("Arguments passed must be icon objects retruned from makeIcon()")
+        res
+      })
+  } else {
+    icones_3mod_plus <- icones_4mod_plus <- c()
+  }
+  
+  
   ########################
   # Sauvegarde des objets 
   save(
     date_derniere_campagne_usuelle,
     date_derniere_campagne_comp,
+    date_derniere_campagne_onde_plus,
     df_categ_obs_4mod,
     stations_onde_geo_map1,
     icones_3mod, icones_4mod,
+    icones_3mod_plus, icones_4mod_plus,
     stations_inactives_onde_geo,
     stations_anciennes_onde_geo_map1,
+    stations_onde_geo_map1,
+    stations_onde_plus_geo_map1,
     masque_eu,
     depts_sel,
     depts_sel_bbox,
@@ -549,12 +699,15 @@ if (to_update) {
   
   save(stations_onde_geo_usuelles,
        stations_inactives_onde_geo, 
+       stations_onde_plus_geo,
        onde_dernieres_campagnes,
        onde_dernieres_campagnes_usuelles, 
        onde_dernieres_campagnes_comp,
-       onde_periode,
+       onde_plus_dernieres_campagnes,
        onde_dernieres_campagnes_anciennes_stations,
+       onde_periode,
        onde_anciennes_stations,
+       onde_plus,
        df_categ_obs_3mod,
        df_categ_obs_3mod_reg,
        mes_couleurs_3mod,
