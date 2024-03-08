@@ -407,7 +407,7 @@ plot_bilan_prop <- function(data_bilan, lib_ecoulement, regional = FALSE, modali
       ggplot2::ggplot(
         mapping = ggplot2::aes(x = as.factor(Annee), y = pct, fill = label)
       ) + 
-      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::geom_col(width = .95) +
       ggplot2::geom_text(
         mapping = ggplot2::aes(y = pct, label = nb_station), 
         fontface ="italic",
