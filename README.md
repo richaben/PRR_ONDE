@@ -32,7 +32,7 @@ Voir <https://github.com/richaben/PRR_ONDE/blob/master/Install.md#d%C3%A9sinstal
 
 -   Île-de-France [![](images/github-mark-white_18px.png)](https://github.com/OFB-IdF/PRR_ONDE) : <https://ofb-idf.github.io/PRR_ONDE/>
 
--   Grand Est [![](images/github-mark-white_18px.png)](https://ofb-ge.github.io/PRR_ONDE/) : <https://ofb-ge.github.io/PRR_ONDE/>
+-   Grand Est [![](images/github-mark-white_18px.png)](https://github.com/OFB-GE/PRR_ONDE) : <https://ofb-ge.github.io/PRR_ONDE/>
 
 -   Bretagne [![](images/github-mark-white_18px.png)](https://github.com/ofb-bzh/PRR_ONDE) : <https://ofb-bzh.github.io/PRR_ONDE/>
 
