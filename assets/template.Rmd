@@ -128,16 +128,16 @@ campagne_en_cours <- stations_onde_geo_map1 %>%
   finalize_map <- function(map, bbox) {
     map@map <- map@map %>% 
       leaflet::addTiles(group = "OSM") %>%
-      leaflet::addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+      leaflet::addTiles("https://data.geopf.fr/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
                options = c(leaflet::WMSTileOptions(tileSize = 256),
                            leaflet::providerTileOptions(minZoom = 1, maxZoom = 15)),
-               attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+               attribution='<a target="_blank" href="https://geoservices.ign.fr/">IGN France</a>',
                group = "Plan IGN"
       ) %>%
-      leaflet::addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+      leaflet::addTiles("https://data.geopf.fr/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
                options = c(leaflet::WMSTileOptions(tileSize = 256),
                            leaflet::providerTileOptions(minZoom = 1, maxZoom = 22)),
-               attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+               attribution='<a target="_blank" href="https://geoservices.ign.fr/">IGN France</a>',
                group = "Photo aérienne"
       ) %>%
       
